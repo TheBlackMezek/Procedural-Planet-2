@@ -6,11 +6,11 @@ namespace ECS_Experiments
 {
 
     [Serializable]
-    public struct Test : ISharedComponentData
+    public struct Test : IComponentData
     {
         public float moveSpeed;
     }
 
-    public class TestComponent : SharedComponentDataWrapper<Test> { }
+    public class TestComponent : ComponentDataWrapper<Test> { }
 
 }
