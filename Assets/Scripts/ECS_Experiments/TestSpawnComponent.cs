@@ -9,6 +9,8 @@ namespace ECS_Experiments
     public struct TestSpawn : ISharedComponentData
     {
         public GameObject prefab;
+        public int spawnCount;
+        public float spawnRange;
     }
 
     public class TestSpawnComponent : SharedComponentDataWrapper<TestSpawn> { }

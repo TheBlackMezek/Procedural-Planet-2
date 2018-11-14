@@ -31,8 +31,22 @@ namespace ECS_Experiments
             ComponentGroup group = GetComponentGroup(typeof(TestSpawn));
             
             SharedComponentDataArray<TestSpawn> array = group.GetSharedComponentDataArray<TestSpawn>();
-            
-            EntityManager.Instantiate(array[0].prefab);
+
+            int spawnCount = array[0].spawnCount;
+            float spawnRange = array[0].spawnRange;
+            GameObject prefab = array[0].prefab;
+
+            for(int i = 0; i < spawnCount; ++i)
+                EntityManager.Instantiate(prefab);
+
+            ComponentGroup group2 = GetComponentGroup(typeof(Position));
+
+            ComponentDataArray<Position> array2 = group2.GetComponentDataArray<Position>();
+            UnityEngine.Random.Range(-spawnRange, spawnRange);
+            for(int i = 0; i < array2.Length; ++i)
+                array2[i] = new Position { Value = new float3(UnityEngine.Random.Range(-spawnRange, spawnRange),
+                                                              0f,
+                                                              UnityEngine.Random.Range(-spawnRange, spawnRange)) };
         }
 
     }
