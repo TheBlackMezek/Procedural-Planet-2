@@ -10,7 +10,8 @@ public struct TerrainNode : IComponentData
     public float3 corner2;
     public float3 corner3;
     public int level;
-    public Planet planet;
+    public Planet planetData;
+    public bool built;
 }
 
 public class TerrainNodeComponent : ComponentDataWrapper<TerrainNode> { }

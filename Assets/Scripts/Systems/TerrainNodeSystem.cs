@@ -1,16 +1,20 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using Unity.Collections;
+using Unity.Entities;
+using Unity.Mathematics;
+using Unity.Transforms;
+using Unity.Jobs;
 using UnityEngine;
+using Unity.Rendering;
 
-public class TerrainNodeSystem : MonoBehaviour {
+public class TerrainNodeSystem : ComponentSystem
+{
 
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+    protected override void OnUpdate()
+    {
+        ComponentGroup nodeGroup = GetComponentGroup(typeof(TerrainNode), typeof(MeshInstanceRenderer));
+
+        ComponentDataArray<TerrainNode> nodeArray = nodeGroup.GetComponentDataArray<TerrainNode>();
+        //ComponentDataArray<MeshInstanceRenderer> meshGroup = nodeGroup.GetComponentDataArray<MeshInstanceRenderer>();
+    }
+
 }
