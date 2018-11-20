@@ -22,6 +22,7 @@ GameObject:
   - component: {fileID: 114984729217530486}
   - component: {fileID: 114101220689406554}
   - component: {fileID: 114973377059593582}
+  - component: {fileID: 114559557596506474}
   m_Layer: 0
   m_Name: TerrainNode
   m_TagString: Untagged
@@ -67,10 +68,27 @@ MonoBehaviour:
       y: 0
       z: 0
     level: 0
-    planet:
+    planetData:
       radius: 0
       maxNodeLevels: 0
       meshSubdivisions: 0
+    built: 0
+--- !u!114 &114559557596506474
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1140473896933362}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0af0db853e732453799566a0e597993c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SerializedData:
+    Value:
+      x: 0
+      y: 0
+      z: 0
 --- !u!114 &114973377059593582
 MonoBehaviour:
   m_ObjectHideFlags: 1

@@ -115,11 +115,13 @@ public class PlanetSystem : ComponentSystem
                 TerrainNode node = EntityManager.GetComponentData<TerrainNode>(nodeEntity);
                 node.level = 0;
                 node.planetData = planet;
+                node.built = 0;
 
                 int idx = n * 3;
                 node.corner1 = icoVerts[idx];
                 node.corner2 = icoVerts[idx+1];
                 node.corner3 = icoVerts[idx+2];
+                EntityManager.SetComponentData(nodeEntity, node);
             }
         }
 
