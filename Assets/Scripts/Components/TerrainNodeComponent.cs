@@ -11,6 +11,7 @@ public struct TerrainNode : IComponentData
     public float3 corner3;
     public int level;
     public Planet planetData;
+    public PlanetNoise noiseData;
     public int built;
 }
 

@@ -96,10 +96,11 @@ public class PlanetSystem : ComponentSystem
 
         flag = true;
 
-        ComponentGroup planetGroup = GetComponentGroup(typeof(Planet));
+        ComponentGroup planetGroup = GetComponentGroup(typeof(Planet), typeof(PlanetNoise));
         ComponentGroup dataGroup = GetComponentGroup(typeof(PlanetSharedData));
 
         ComponentDataArray<Planet> planetArray = planetGroup.GetComponentDataArray<Planet>();
+        ComponentDataArray<PlanetNoise> noiseArray = planetGroup.GetComponentDataArray<PlanetNoise>();
         SharedComponentDataArray<PlanetSharedData> dataArray = dataGroup.GetSharedComponentDataArray<PlanetSharedData>();
         
         GameObject prefab = dataArray[0].nodePrefab;
@@ -108,6 +109,7 @@ public class PlanetSystem : ComponentSystem
         {
             float r = planetArray[i].radius;
             Planet planet = planetArray[i];
+            PlanetNoise noise = noiseArray[i];
 
             for(int n = 0; n < 20; ++n)
             {
@@ -115,6 +117,7 @@ public class PlanetSystem : ComponentSystem
                 TerrainNode node = EntityManager.GetComponentData<TerrainNode>(nodeEntity);
                 node.level = 0;
                 node.planetData = planet;
+                node.noiseData = noise;
                 node.built = 0;
 
                 int idx = n * 3;

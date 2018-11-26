@@ -43,7 +43,7 @@ public class TerrainNodeSystem : ComponentSystem
 
             Vector3[] corners = new Vector3[3] { nodeArray[i].corner3, nodeArray[i].corner2, nodeArray[i].corner1 };
 
-            Mesh mesh = BuildMesh(corners, planetData.meshSubdivisions, planetData.radius, 0);
+            Mesh mesh = BuildMesh(corners, planetData.meshSubdivisions, planetData.radius, nodeArray[i].noiseData, 0);
 
             //Mesh mesh = new Mesh();
             //
@@ -71,7 +71,7 @@ public class TerrainNodeSystem : ComponentSystem
         }
     }
 
-    public static Mesh BuildMesh(Vector3[] corners, int divisions, float sphereRadius, int nodeLevel)
+    public static Mesh BuildMesh(Vector3[] corners, int divisions, float sphereRadius, PlanetNoise noiseData, int nodeLevel)
     {
         // rez is the number of vertices on one side of the mesh/triangle
         // the part in parentheses is called the "Mersenne Number"
@@ -86,6 +86,7 @@ public class TerrainNodeSystem : ComponentSystem
         Vector3[] vertices = new Vector3[nVerts];
         Vector3[] normals = new Vector3[nVerts];
         Vector2[] uvs = new Vector2[nVerts];
+        Color[] vColors = new Color[nVerts];
         int[] indices = new int[nTris * 3];
 
         float dist01 = Vector3.Distance(corners[0], corners[1]);
@@ -107,9 +108,12 @@ public class TerrainNodeSystem : ComponentSystem
             {
                 vertices[vIdx] = corners[0] + add1 * i + add2 * n;
                 Vector3 normal = (vertices[vIdx]).normalized;
-                vertices[vIdx] = normal * sphereRadius;
+                float noiseVal = GetValue(normal, noiseData, nodeLevel);
+                vertices[vIdx] = normal * (sphereRadius + noiseVal);
 
                 normals[vIdx] = normal;
+
+                vColors[vIdx] = GetVertexColor(noiseData, noiseVal);
 
                 ++vIdx;
             }
@@ -156,10 +160,72 @@ public class TerrainNodeSystem : ComponentSystem
         Mesh mesh = new Mesh();
         mesh.vertices = vertices;
         mesh.triangles = indices;
+        mesh.colors = vColors;
         //mesh.uv = uvs;
         //mesh.normals = normals;
         mesh.RecalculateNormals();
         return mesh;
     }
+
+
+
+    private static Color GetVertexColor(PlanetNoise noiseData, float heightFromSeaLevel)
+    {
+        int layerIdx = 0;
+
+        return Color.gray;
+
+        //int len = noiseData.colorLayers.Length;
+        //for (int i = 1; i < len; ++i)
+        //{
+        //    PlanetColorLayer layer = noiseData.colorLayers[i];
+        //
+        //    if (layer.heightThreshold < heightFromSeaLevel)
+        //        layerIdx = i;
+        //    else
+        //        break;
+        //}
+        //
+        //return new Color(noiseData.colorLayers[layerIdx].r,
+        //                 noiseData.colorLayers[layerIdx].g,
+        //                 noiseData.colorLayers[layerIdx].b);
+    }
+
+
+
+    public static float GetValue(float x, float y, float z, PlanetNoise noiseData, int level = 0)
+    {
+        float ret = GetNoiseValue(x, y, z, noiseData, level);
+        //ret = settings.heightCurve.Evaluate(ret);
+        if (UnityEngine.Random.Range(0, 1000) == 1) Debug.Log(ret);
+        return ret;
+    }
+
+    public static float GetNoiseValue(float x, float y, float z, PlanetNoise noiseData, int level = 0)
+    {
+        float localFreq = noiseData.frequency;
+        float localAmp = noiseData.amplitude;
+
+        float maxValue = 0f;
+        float ret = 0f;
+
+        FastNoise fastNoise = new FastNoise(noiseData.seed);
+
+        for (int i = 0; i < noiseData.octaves + level * 1; ++i)
+        {
+            //ret += noiseClass.GetValue(x * localFreq, y * localFreq, z * localFreq) * localAmp;
+            ret += fastNoise.GetSimplex(x * localFreq, y * localFreq, z * localFreq) * localAmp;
+
+            maxValue += localAmp;
+
+            localFreq *= noiseData.lacunarity;
+            localAmp *= noiseData.persistence;
+        }
+
+        return ret / maxValue;
+    }
+
+    public static float GetValue(Vector3 pos, PlanetNoise noiseData, int level = 0)
+        { return GetValue(pos.x, pos.y, pos.z, noiseData, level); }
 
 }
