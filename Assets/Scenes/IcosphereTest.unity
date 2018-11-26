@@ -327,7 +327,7 @@ MonoBehaviour:
   m_SerializedData:
     octaves: 6
     frequency: 4
-    lacunarity: 2
+    lacunarity: 3
     amplitude: 1
     persistence: 0.5
     seed: 0

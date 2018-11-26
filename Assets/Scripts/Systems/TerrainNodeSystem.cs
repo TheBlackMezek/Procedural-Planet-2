@@ -109,7 +109,7 @@ public class TerrainNodeSystem : ComponentSystem
                 vertices[vIdx] = corners[0] + add1 * i + add2 * n;
                 Vector3 normal = (vertices[vIdx]).normalized;
                 float noiseVal = GetValue(normal, noiseData, nodeLevel);
-                vertices[vIdx] = normal * (sphereRadius + noiseVal);
+                vertices[vIdx] = normal * (sphereRadius + noiseVal * sphereRadius);
 
                 normals[vIdx] = normal;
 
