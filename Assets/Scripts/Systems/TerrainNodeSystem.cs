@@ -30,14 +30,11 @@ public class TerrainNodeSystem : ComponentSystem
         
         for(int i = 0; i < meshArray.Length; ++i)
         {
-            //Debug.Log("Start" + nodeArray[i].built);
             Vector3 corner1 = nodeArray[i].corner1;
             Vector3 corner2 = nodeArray[i].corner2;
             Vector3 corner3 = nodeArray[i].corner3;
-            //Debug.Log("Set corners" + nodeArray[i].built);
 
             Mesh mesh = new Mesh();
-            //Debug.Log("Made mesh" + nodeArray[i].built);
 
             Vector3[] vertices = new Vector3[3]
             {
@@ -45,18 +42,19 @@ public class TerrainNodeSystem : ComponentSystem
                 corner2,
                 corner3
             };
-            //Debug.Log("Set vertices" + nodeArray[i].built);
+            int[] tris = new int[3]
+            {
+                0, 1, 2
+            };
 
             mesh.vertices = vertices;
+            mesh.triangles = tris;
             mesh.RecalculateNormals();
-            //Debug.Log("Calculated normals" + nodeArray[i].built);
 
             MeshInstanceRenderer mir = meshArray[i];
-            //Debug.Log("Got mesh renderer" + nodeArray[i].built);
             mir.mesh = mesh;
             Entity e = entityArray[i];
             EntityManager.SetSharedComponentData(e, mir);
-            //Debug.Log("Set mesh" + nodeArray[i].built);
         }
     }
 
