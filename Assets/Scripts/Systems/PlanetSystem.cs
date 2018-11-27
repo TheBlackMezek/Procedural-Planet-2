@@ -119,6 +119,7 @@ public class PlanetSystem : ComponentSystem
                 node.planetData = planet;
                 node.noiseData = noise;
                 node.built = 0;
+                node.divided = 0;
 
                 int idx = n * 3;
                 node.corner1 = icoVerts[idx];

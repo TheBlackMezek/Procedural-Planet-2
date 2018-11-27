@@ -9,10 +9,18 @@ using Unity.Rendering;
 public class TerrainNodeSystem : ComponentSystem
 {
 
+    private const float PERCENT_DIST_TO_SUBDIVIDE_AT = 100f;
+
     protected override void OnUpdate()
     {
         ComponentGroup nodeGroup = GetComponentGroup(typeof(TerrainNode), typeof(MeshInstanceRenderer), typeof(Position));
         ComponentGroup camGroup = GetComponentGroup(typeof(Flycam), typeof(Position), typeof(Rotation));
+        ComponentGroup dataGroup = GetComponentGroup(typeof(PlanetSharedData));
+
+        SharedComponentDataArray<PlanetSharedData> planetDataArray = dataGroup.GetSharedComponentDataArray<PlanetSharedData>();
+        PlanetSharedData[] dataArray = new PlanetSharedData[planetDataArray.Length];
+        for (int i = 0; i < dataArray.Length; ++i)
+            dataArray[i] = planetDataArray[i];
 
         EntityArray entityTempArray = nodeGroup.GetEntityArray();
         Entity[] entityArray = new Entity[entityTempArray.Length];
@@ -41,31 +49,35 @@ public class TerrainNodeSystem : ComponentSystem
 
         for (int i = 0; i < meshArray.Length; ++i)
         {
-            if (nodeArray[i].built == 1)
+            if (nodeArray[i].built == 1 && nodeArray[i].divided == 0)
             {
-                //bool inSubdivideRange = false;
-                //Vector3 myPos = transform.position;
-                //
-                //Vector3 corner0Pos = corners[0] * sphereRadius;
-                //Vector3 corner1Pos = corners[1] * sphereRadius;
-                //
-                //float distToSubdivide = Vector3.Distance(corner0Pos, corner1Pos) * (percentDistToSubdivideAt / 100f);
-                //
-                //Vector3 centerPoint = transform.TransformPoint(((corners[0] + corners[1] + corners[2]) / 3f) * sphereRadius);
-                //float dist = Vector3.Distance(parentSphere.Player.position, centerPoint);
-                //
-                //if (dist < distToSubdivide)
-                //{
-                //    inSubdivideRange = true;
-                //
-                //    if (children == null)
-                //        Subdivide();
-                //}
-                //
+                bool inSubdivideRange = false;
+                float3 myPos = posArray[i].Value;
+                float3 corner0 = nodeArray[i].corner1;
+                float3 corner1 = nodeArray[i].corner2;
+                float3 corner2 = nodeArray[i].corner3;
+                float sphereRadius = nodeArray[i].planetData.radius;
+
+                float3 corner0Pos = corner0 * sphereRadius;
+                float3 corner1Pos = corner1 * sphereRadius;
+                
+                float distToSubdivide = math.distance(corner0Pos, corner1Pos) * (PERCENT_DIST_TO_SUBDIVIDE_AT / 100f);
+                
+                float3 centerPoint = myPos + ((corner0 + corner1 + corner2) / 3f) * sphereRadius;
+                float dist = math.distance(camPos, centerPoint);
+
+                if (dist < distToSubdivide)
+                {
+                    inSubdivideRange = true;
+
+                    if (nodeArray[i].divided == 0)
+                        Subdivide(entityArray[i], nodeArray[i], posArray[i], meshArray[i], dataArray[0]);
+                }
+                
                 //if (!inSubdivideRange && children != null)
                 //    Recombine();
             }
-            else
+            else if(nodeArray[i].built == 0 && nodeArray[i].divided == 0)
             {
                 nodeArray[i].built = 1;
 
@@ -77,7 +89,7 @@ public class TerrainNodeSystem : ComponentSystem
 
                 Vector3[] corners = new Vector3[3] { nodeArray[i].corner3, nodeArray[i].corner2, nodeArray[i].corner1 };
 
-                Mesh mesh = BuildMesh(corners, planetData.meshSubdivisions, planetData.radius, nodeArray[i].noiseData, 0);
+                Mesh mesh = BuildMesh(corners, planetData.meshSubdivisions, planetData.radius, nodeArray[i].noiseData, nodeArray[i].level);
 
                 //Mesh mesh = new Mesh();
                 //
@@ -229,11 +241,79 @@ public class TerrainNodeSystem : ComponentSystem
 
 
 
+    private void Subdivide(Entity e, TerrainNode t, Position p, MeshInstanceRenderer r, PlanetSharedData d)
+    {
+        Entity[] entities = new Entity[4];
+        TerrainNode[] nodes = new TerrainNode[4];
+
+        float3 corner0 = t.corner1;
+        float3 corner1 = t.corner2;
+        float3 corner2 = t.corner3;
+
+        for (int i = 0; i < 4; ++i)
+        {
+            entities[i] = EntityManager.Instantiate(d.nodePrefab);
+            nodes[i] = EntityManager.GetComponentData<TerrainNode>(entities[i]);
+            nodes[i].level = t.level + 1;
+            nodes[i].planetData = t.planetData;
+            nodes[i].noiseData = t.noiseData;
+            nodes[i].built = 0;
+            nodes[i].divided = 0;
+            
+            //GameObject child = Instantiate(parentSphere.NodePrefab);
+            //child.transform.position = transform.position;
+            //child.transform.rotation = transform.rotation;
+            //child.transform.parent = transform;
+            //children[i] = child.GetComponent<PlatosphereNode>();
+        }
+        
+        float3 mid01 = corner1 - corner0;
+        mid01 = corner0 + math.normalize(mid01) * (math.length(mid01) / 2f);
+        float3 mid02 = corner2 - corner0;
+        mid02 = corner0 + math.normalize(mid02) * (math.length(mid02) / 2f);
+        float3 mid12 = corner2 - corner1;
+        mid12 = corner1 + math.normalize(mid12) * (math.length(mid12) / 2f);
+
+        Vector3[] corners0 = new Vector3[] { corner0, mid01, mid02 }; //top
+        Vector3[] corners1 = new Vector3[] { mid01, corner1, mid12 }; //left
+        Vector3[] corners2 = new Vector3[] { mid02, mid12, corner2 }; //right
+        Vector3[] corners3 = new Vector3[] { mid02, mid01, mid12 }; //center
+
+        nodes[0].corner1 = corner0;
+        nodes[0].corner2 = mid01;
+        nodes[0].corner3 = mid02;
+
+        nodes[1].corner1 = mid01;
+        nodes[1].corner2 = corner1;
+        nodes[1].corner3 = mid12;
+
+        nodes[2].corner1 = mid02;
+        nodes[2].corner2 = mid12;
+        nodes[2].corner3 = corner2;
+
+        nodes[3].corner1 = mid02;
+        nodes[3].corner2 = mid01;
+        nodes[3].corner3 = mid12;
+
+        for (int i = 0; i < 4; ++i)
+            EntityManager.SetComponentData(entities[i], nodes[i]);
+
+        r.mesh = null;
+
+        t.divided = 1;
+        t.built = 0;
+
+        EntityManager.SetSharedComponentData(e, r);
+        EntityManager.SetComponentData(e, t);
+    }
+
+
+
     public static float GetValue(float x, float y, float z, PlanetNoise noiseData, int level = 0)
     {
         float ret = GetNoiseValue(x, y, z, noiseData, level);
         //ret = settings.heightCurve.Evaluate(ret);
-        if (UnityEngine.Random.Range(0, 1000) == 1) Debug.Log(ret);
+        
         return ret;
     }
 

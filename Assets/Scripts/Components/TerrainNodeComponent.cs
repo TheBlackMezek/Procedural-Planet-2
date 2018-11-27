@@ -14,6 +14,7 @@ public struct TerrainNode : IComponentData
     public PlanetNoise noiseData;
     public float3 parentCenter;
     public int built;
+    public int divided;
 }
 
 public class TerrainNodeComponent : ComponentDataWrapper<TerrainNode> { }
