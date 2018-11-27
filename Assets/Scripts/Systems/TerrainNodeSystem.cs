@@ -11,7 +11,8 @@ public class TerrainNodeSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
-        ComponentGroup nodeGroup = GetComponentGroup(typeof(TerrainNode), typeof(MeshInstanceRenderer));
+        ComponentGroup nodeGroup = GetComponentGroup(typeof(TerrainNode), typeof(MeshInstanceRenderer), typeof(Position));
+        ComponentGroup camGroup = GetComponentGroup(typeof(Flycam), typeof(Position), typeof(Rotation));
 
         EntityArray entityTempArray = nodeGroup.GetEntityArray();
         Entity[] entityArray = new Entity[entityTempArray.Length];
@@ -27,48 +28,83 @@ public class TerrainNodeSystem : ComponentSystem
         TerrainNode[] nodeArray = new TerrainNode[nodeCDArray.Length];
         for (int i = 0; i < nodeCDArray.Length; ++i)
             nodeArray[i] = nodeCDArray[i];
-        
-        for(int i = 0; i < meshArray.Length; ++i)
+
+        ComponentDataArray<Position> nodePosArray = nodeGroup.GetComponentDataArray<Position>();
+        Position[] posArray = new Position[nodePosArray.Length];
+        for (int i = 0; i < nodePosArray.Length; ++i)
+            posArray[i] = nodePosArray[i];
+
+        ComponentDataArray<Position> camPosArray = camGroup.GetComponentDataArray<Position>();
+        float3 camPos = camPosArray[0].Value;
+
+
+
+        for (int i = 0; i < meshArray.Length; ++i)
         {
-            if (nodeArray[i].built != 0)
-                continue;
+            if (nodeArray[i].built == 1)
+            {
+                //bool inSubdivideRange = false;
+                //Vector3 myPos = transform.position;
+                //
+                //Vector3 corner0Pos = corners[0] * sphereRadius;
+                //Vector3 corner1Pos = corners[1] * sphereRadius;
+                //
+                //float distToSubdivide = Vector3.Distance(corner0Pos, corner1Pos) * (percentDistToSubdivideAt / 100f);
+                //
+                //Vector3 centerPoint = transform.TransformPoint(((corners[0] + corners[1] + corners[2]) / 3f) * sphereRadius);
+                //float dist = Vector3.Distance(parentSphere.Player.position, centerPoint);
+                //
+                //if (dist < distToSubdivide)
+                //{
+                //    inSubdivideRange = true;
+                //
+                //    if (children == null)
+                //        Subdivide();
+                //}
+                //
+                //if (!inSubdivideRange && children != null)
+                //    Recombine();
+            }
+            else
+            {
+                nodeArray[i].built = 1;
 
-            nodeArray[i].built = 1;
-            
-            Planet planetData = nodeArray[i].planetData;
+                Planet planetData = nodeArray[i].planetData;
 
-            Vector3 corner1 = nodeArray[i].corner1 * planetData.radius;
-            Vector3 corner2 = nodeArray[i].corner2 * planetData.radius;
-            Vector3 corner3 = nodeArray[i].corner3 * planetData.radius;
+                Vector3 corner1 = nodeArray[i].corner1 * planetData.radius;
+                Vector3 corner2 = nodeArray[i].corner2 * planetData.radius;
+                Vector3 corner3 = nodeArray[i].corner3 * planetData.radius;
 
-            Vector3[] corners = new Vector3[3] { nodeArray[i].corner3, nodeArray[i].corner2, nodeArray[i].corner1 };
+                Vector3[] corners = new Vector3[3] { nodeArray[i].corner3, nodeArray[i].corner2, nodeArray[i].corner1 };
 
-            Mesh mesh = BuildMesh(corners, planetData.meshSubdivisions, planetData.radius, nodeArray[i].noiseData, 0);
+                Mesh mesh = BuildMesh(corners, planetData.meshSubdivisions, planetData.radius, nodeArray[i].noiseData, 0);
 
-            //Mesh mesh = new Mesh();
-            //
-            //Vector3[] vertices = new Vector3[3]
-            //{
-            //    corner1,
-            //    corner2,
-            //    corner3
-            //};
-            //int[] tris = new int[3]
-            //{
-            //    0, 1, 2
-            //};
-            //
-            //mesh.vertices = vertices;
-            //mesh.triangles = tris;
-            //mesh.RecalculateNormals();
+                //Mesh mesh = new Mesh();
+                //
+                //Vector3[] vertices = new Vector3[3]
+                //{
+                //    corner1,
+                //    corner2,
+                //    corner3
+                //};
+                //int[] tris = new int[3]
+                //{
+                //    0, 1, 2
+                //};
+                //
+                //mesh.vertices = vertices;
+                //mesh.triangles = tris;
+                //mesh.RecalculateNormals();
 
-            //MeshInstanceRenderer mir = meshArray[i];
-            //mir.mesh = mesh;
-            meshArray[i].mesh = mesh;
-            Entity e = entityArray[i];
-            EntityManager.SetSharedComponentData(e, meshArray[i]);
-            EntityManager.SetComponentData(e, nodeArray[i]);
+                //MeshInstanceRenderer mir = meshArray[i];
+                //mir.mesh = mesh;
+                meshArray[i].mesh = mesh;
+                Entity e = entityArray[i];
+                EntityManager.SetSharedComponentData(e, meshArray[i]);
+                EntityManager.SetComponentData(e, nodeArray[i]);
+            }
         }
+
     }
 
     public static Mesh BuildMesh(Vector3[] corners, int divisions, float sphereRadius, PlanetNoise noiseData, int nodeLevel)
