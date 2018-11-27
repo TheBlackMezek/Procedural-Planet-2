@@ -15,8 +15,10 @@ public class TerrainNodeSystem : ComponentSystem
     private struct MeshCreationSet
     {
         public Entity entity;
-        public MeshInstanceRenderer renderer;
         public JobHandle jobHandle;
+        public NativeArray<Vector3> verts;
+        public NativeArray<int> tris;
+
     }
     private List<MeshCreationSet> meshCreationSets = new List<MeshCreationSet>();
 
@@ -25,7 +27,9 @@ public class TerrainNodeSystem : ComponentSystem
     struct MeshBuildJob : IJob
     {
         public TerrainNode node;
-        public float3[] corners;
+        public float3 corner0;
+        public float3 corner1;
+        public float3 corner2;
         public int rez;
         public int nTris;
         public int nVerts;
@@ -34,31 +38,29 @@ public class TerrainNodeSystem : ComponentSystem
 
         public void Execute()
         {
-            
-            
             Vector3[] vertices = new Vector3[nVerts];
             //Vector3[] normals = new Vector3[nVerts];
             //Vector2[] uvs = new Vector2[nVerts];
             int[] indices = new int[nTris * 3];
-
-            float dist01 = Vector3.Distance(corners[0], corners[1]);
-            float dist12 = Vector3.Distance(corners[1], corners[2]);
-            float dist20 = Vector3.Distance(corners[2], corners[0]);
-
+            
+            float dist01 = Vector3.Distance(corner0, corner1);
+            float dist12 = Vector3.Distance(corner1, corner2);
+            float dist20 = Vector3.Distance(corner2, corner0);
+            
             float lenAxis01 = dist01 / (rez - 1);
             float lenAxis12 = dist12 / (rez - 1);
             float lenAxis20 = dist20 / (rez - 1);
-
-            float3 add1 = math.normalize(corners[1] - corners[0]) * lenAxis01;
-            float3 add2 = math.normalize(corners[2] - corners[1]) * lenAxis12;
-
+            
+            float3 add1 = math.normalize(corner1 - corner0) * lenAxis01;
+            float3 add2 = math.normalize(corner2 - corner1) * lenAxis12;
+            
             int vIdx = 0;
 
             for (int i = 0; i < rez; ++i)
             {
                 for (int n = 0; n <= i; ++n)
                 {
-                    vertices[vIdx] = corners[0] + add1 * i + add2 * n;
+                    vertices[vIdx] = corner0 + add1 * i + add2 * n;
                     Vector3 normal = (vertices[vIdx]).normalized;
                     float noiseVal = GetValue(normal, node.noiseData, node.level);
                     vertices[vIdx] = normal * (node.planetData.radius + noiseVal * node.noiseData.finalValueMultiplier);
@@ -69,7 +71,7 @@ public class TerrainNodeSystem : ComponentSystem
                     ++vIdx;
                 }
             }
-
+            
             int indIdx = 0;
             int rowStartIdx = 1;
             int prevRowStartIdx = 0;
@@ -107,7 +109,7 @@ public class TerrainNodeSystem : ComponentSystem
                 prevRowStartIdx = rowStartIdx;
                 rowStartIdx += vertsInRowBottom;
             }
-
+            
             verts.CopyFrom(vertices);
             tris.CopyFrom(indices);
         }
@@ -117,6 +119,36 @@ public class TerrainNodeSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
+        for(int i = meshCreationSets.Count - 1; i >= 0; --i)
+        {
+            if(meshCreationSets[i].jobHandle.IsCompleted)
+            {
+                meshCreationSets[i].jobHandle.Complete();
+
+                if(EntityManager.Exists(meshCreationSets[i].entity))
+                {
+                    Mesh mesh = new Mesh();
+
+                    mesh.vertices = meshCreationSets[i].verts.ToArray();
+                    mesh.triangles = meshCreationSets[i].tris.ToArray();
+                    mesh.RecalculateNormals();
+
+                    MeshInstanceRenderer r = EntityManager.GetSharedComponentData<MeshInstanceRenderer>(meshCreationSets[i].entity);
+
+                    r.mesh = mesh;
+
+                    EntityManager.SetSharedComponentData(meshCreationSets[i].entity, r);
+                }
+
+                meshCreationSets[i].verts.Dispose();
+                meshCreationSets[i].tris.Dispose();
+
+                meshCreationSets.RemoveAt(i);
+            }
+        }
+
+
+
         ComponentGroup nodeGroup = GetComponentGroup(typeof(TerrainNode), typeof(MeshInstanceRenderer), typeof(Position));
         ComponentGroup camGroup = GetComponentGroup(typeof(Flycam), typeof(Position), typeof(Rotation));
         ComponentGroup dataGroup = GetComponentGroup(typeof(PlanetSharedData));
@@ -208,11 +240,9 @@ public class TerrainNodeSystem : ComponentSystem
 
                 Planet planetData = nodeArray[i].planetData;
 
-                float3 corner1 = nodeArray[i].corner1 * planetData.radius;
-                float3 corner2 = nodeArray[i].corner2 * planetData.radius;
-                float3 corner3 = nodeArray[i].corner3 * planetData.radius;
-
-                float3[] corners = new float3[3] { nodeArray[i].corner3, nodeArray[i].corner2, nodeArray[i].corner1 };
+                //float3 corner1 = nodeArray[i].corner1 * planetData.radius;
+                //float3 corner2 = nodeArray[i].corner2 * planetData.radius;
+                //float3 corner3 = nodeArray[i].corner3 * planetData.radius;
 
                 // rez is the number of vertices on one side of the mesh/triangle
                 // the part in parentheses is called the "Mersenne Number"
@@ -225,34 +255,50 @@ public class TerrainNodeSystem : ComponentSystem
                 int nVerts = (rez * (rez + 1)) / 2;
 
                 NativeArray<Vector3> verts = new NativeArray<Vector3>(nVerts, Allocator.Persistent);
-                NativeArray<int> tris = new NativeArray<int>(nTris, Allocator.Persistent);
+                NativeArray<int> tris = new NativeArray<int>(nTris * 3, Allocator.Persistent);
 
                 MeshBuildJob job = new MeshBuildJob();
                 job.node = nodeArray[i];
-                job.corners = corners;
+                job.corner0 = nodeArray[i].corner3;
+                job.corner1 = nodeArray[i].corner2;
+                job.corner2 = nodeArray[i].corner1;
                 job.rez = rez;
                 job.nTris = nTris;
                 job.nVerts = nVerts;
                 job.verts = verts;
                 job.tris = tris;
-
+                
                 JobHandle handle = job.Schedule();
-
+                JobHandle.ScheduleBatchedJobs();
+                
                 MeshCreationSet mcs = new MeshCreationSet();
                 mcs.entity = entityArray[i];
-                mcs.renderer = meshArray[i];
                 mcs.jobHandle = handle;
+                mcs.verts = verts;
+                mcs.tris = tris;
+                meshCreationSets.Add(mcs);
 
                 //Mesh mesh = BuildMesh(corners, planetData.meshSubdivisions, planetData.radius, nodeArray[i].noiseData, nodeArray[i].level);
                 //
                 //meshArray[i].mesh = mesh;
                 //Entity e = entityArray[i];
                 //EntityManager.SetSharedComponentData(e, meshArray[i]);
-                //EntityManager.SetComponentData(e, nodeArray[i]);
+                EntityManager.SetComponentData(entityArray[i], nodeArray[i]);
             }
         }
 
     }
+    
+    protected override void OnStopRunning()
+    {
+        for(int i = 0; i < meshCreationSets.Count; ++i)
+        {
+            meshCreationSets[i].verts.Dispose();
+            meshCreationSets[i].tris.Dispose();
+        }
+    }
+
+
 
     public static Mesh BuildMesh(Vector3[] corners, int divisions, float sphereRadius, PlanetNoise noiseData, int nodeLevel)
     {
