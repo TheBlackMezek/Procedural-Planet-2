@@ -63,13 +63,13 @@ public class TerrainNodeSystem : ComponentSystem
                 
                 float distToSubdivide = math.distance(corner0Pos, corner1Pos) * (PERCENT_DIST_TO_SUBDIVIDE_AT / 100f);
                 
-                float3 centerPoint = myPos + ((corner0 + corner1 + corner2) / 3f) * sphereRadius;
+                float3 centerPoint = (math.normalize(corner0 + corner1 + corner2) * sphereRadius);
                 float dist = math.distance(camPos, centerPoint);
-
+                Debug.DrawLine(camPos, centerPoint);
                 if (dist < distToSubdivide)
                 {
                     inSubdivideRange = true;
-
+                    
                     if (nodeArray[i].divided == 0)
                         Subdivide(entityArray[i], nodeArray[i], posArray[i], meshArray[i], dataArray[0]);
                 }
@@ -157,7 +157,8 @@ public class TerrainNodeSystem : ComponentSystem
                 vertices[vIdx] = corners[0] + add1 * i + add2 * n;
                 Vector3 normal = (vertices[vIdx]).normalized;
                 float noiseVal = GetValue(normal, noiseData, nodeLevel);
-                vertices[vIdx] = normal * (sphereRadius + noiseVal * sphereRadius);
+                vertices[vIdx] = normal * (sphereRadius + noiseVal * noiseData.finalValueMultiplier);
+                //vertices[vIdx] = normal * sphereRadius; //Use this line instead of above to gen a perfect sphere
 
                 normals[vIdx] = normal;
 
@@ -321,7 +322,7 @@ public class TerrainNodeSystem : ComponentSystem
     {
         float localFreq = noiseData.frequency;
         float localAmp = noiseData.amplitude;
-
+        
         float maxValue = 0f;
         float ret = 0f;
 

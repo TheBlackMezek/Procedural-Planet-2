@@ -403,9 +403,10 @@ MonoBehaviour:
     octaves: 6
     frequency: 4
     lacunarity: 3
-    amplitude: 1
+    amplitude: 0.01
     persistence: 0.5
-    seed: 0
+    finalValueMultiplier: 5
+    seed: 1
 --- !u!1 &1725248756
 GameObject:
   m_ObjectHideFlags: 0
