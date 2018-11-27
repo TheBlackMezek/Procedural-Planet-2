@@ -49,7 +49,7 @@ public class TerrainNodeSystem : ComponentSystem
 
         for (int i = 0; i < meshArray.Length; ++i)
         {
-            if (nodeArray[i].built == 1 && nodeArray[i].divided == 0)
+            if (nodeArray[i].level < nodeArray[i].planetData.maxNodeLevels && nodeArray[i].built == 1 && nodeArray[i].divided == 0)
             {
                 bool inSubdivideRange = false;
                 float3 myPos = posArray[i].Value;

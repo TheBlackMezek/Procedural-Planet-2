@@ -362,7 +362,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_SerializedData:
     radius: 50
-    maxNodeLevels: 0
+    maxNodeLevels: 3
     meshSubdivisions: 8
 --- !u!114 &1547857546
 MonoBehaviour:
