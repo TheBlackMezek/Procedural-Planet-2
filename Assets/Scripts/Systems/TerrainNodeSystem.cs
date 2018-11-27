@@ -49,10 +49,36 @@ public class TerrainNodeSystem : ComponentSystem
 
         for (int i = 0; i < meshArray.Length; ++i)
         {
-            if (nodeArray[i].level < nodeArray[i].planetData.maxNodeLevels && nodeArray[i].built == 1 && nodeArray[i].divided == 0)
+            if (nodeArray[i].built == 1 && nodeArray[i].divided == 0)
             {
-                bool inSubdivideRange = false;
-                float3 myPos = posArray[i].Value;
+                if(nodeArray[i].level < nodeArray[i].planetData.maxNodeLevels)
+                {
+                    float3 corner0 = nodeArray[i].corner1;
+                    float3 corner1 = nodeArray[i].corner2;
+                    float3 corner2 = nodeArray[i].corner3;
+                    float sphereRadius = nodeArray[i].planetData.radius;
+
+                    float3 corner0Pos = corner0 * sphereRadius;
+                    float3 corner1Pos = corner1 * sphereRadius;
+
+                    float distToSubdivide = math.distance(corner0Pos, corner1Pos) * (PERCENT_DIST_TO_SUBDIVIDE_AT / 100f);
+
+                    float3 centerPoint = (math.normalize(corner0 + corner1 + corner2) * sphereRadius);
+                    float dist = math.distance(camPos, centerPoint);
+
+                    if (dist < distToSubdivide)
+                        Subdivide(entityArray[i], nodeArray[i], posArray[i], meshArray[i], dataArray[0]);
+                }
+                if(nodeArray[i].level > 0)
+                {
+                    float dist = math.distance(camPos, nodeArray[i].parentCenter);
+
+                    if (dist >= nodeArray[i].parnetSubdivideDist)
+                        EntityManager.DestroyEntity(entityArray[i]);
+                }
+            }
+            else if(nodeArray[i].built == 0 && nodeArray[i].divided == 1)
+            {
                 float3 corner0 = nodeArray[i].corner1;
                 float3 corner1 = nodeArray[i].corner2;
                 float3 corner2 = nodeArray[i].corner3;
@@ -60,22 +86,17 @@ public class TerrainNodeSystem : ComponentSystem
 
                 float3 corner0Pos = corner0 * sphereRadius;
                 float3 corner1Pos = corner1 * sphereRadius;
-                
+
                 float distToSubdivide = math.distance(corner0Pos, corner1Pos) * (PERCENT_DIST_TO_SUBDIVIDE_AT / 100f);
-                
+
                 float3 centerPoint = (math.normalize(corner0 + corner1 + corner2) * sphereRadius);
                 float dist = math.distance(camPos, centerPoint);
-                Debug.DrawLine(camPos, centerPoint);
-                if (dist < distToSubdivide)
-                {
-                    inSubdivideRange = true;
-                    
-                    if (nodeArray[i].divided == 0)
-                        Subdivide(entityArray[i], nodeArray[i], posArray[i], meshArray[i], dataArray[0]);
-                }
                 
-                //if (!inSubdivideRange && children != null)
-                //    Recombine();
+                if (dist >= distToSubdivide)
+                {
+                    nodeArray[i].divided = 0;
+                    EntityManager.SetComponentData(entityArray[i], nodeArray[i]);
+                }
             }
             else if(nodeArray[i].built == 0 && nodeArray[i].divided == 0)
             {
@@ -261,6 +282,18 @@ public class TerrainNodeSystem : ComponentSystem
             nodes[i].built = 0;
             nodes[i].divided = 0;
             
+            float sphereRadius = t.planetData.radius;
+
+            float3 corner0Pos = corner0 * sphereRadius;
+            float3 corner1Pos = corner1 * sphereRadius;
+
+            float distToSubdivide = math.distance(corner0Pos, corner1Pos) * (PERCENT_DIST_TO_SUBDIVIDE_AT / 100f);
+
+            float3 centerPoint = (math.normalize(corner0 + corner1 + corner2) * sphereRadius);
+
+            nodes[i].parentCenter = centerPoint;
+            nodes[i].parnetSubdivideDist = distToSubdivide;
+
             //GameObject child = Instantiate(parentSphere.NodePrefab);
             //child.transform.position = transform.position;
             //child.transform.rotation = transform.rotation;
@@ -279,7 +312,7 @@ public class TerrainNodeSystem : ComponentSystem
         Vector3[] corners1 = new Vector3[] { mid01, corner1, mid12 }; //left
         Vector3[] corners2 = new Vector3[] { mid02, mid12, corner2 }; //right
         Vector3[] corners3 = new Vector3[] { mid02, mid01, mid12 }; //center
-
+        
         nodes[0].corner1 = corner0;
         nodes[0].corner2 = mid01;
         nodes[0].corner3 = mid02;

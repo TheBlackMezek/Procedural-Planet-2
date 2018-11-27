@@ -13,6 +13,7 @@ public struct TerrainNode : IComponentData
     public Planet planetData;
     public PlanetNoise noiseData;
     public float3 parentCenter;
+    public float parnetSubdivideDist;
     public int built;
     public int divided;
 }
