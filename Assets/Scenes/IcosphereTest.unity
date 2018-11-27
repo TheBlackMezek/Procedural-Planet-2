@@ -275,6 +275,8 @@ MonoBehaviour:
   m_SerializedData:
     mouseSensitivity: 0.05
     rollSensitivity: 0.05
+    moveSpeed: 2
+    moveSpeedChangeMultiplier: 1.5
 --- !u!114 &1026657134
 MonoBehaviour:
   m_ObjectHideFlags: 0
