@@ -16,6 +16,8 @@ public struct TerrainNode : IComponentData
     public float parnetSubdivideDist;
     public int built;
     public int divided;
+    public int childrenBuilt;
+    public Entity parentEntity;
 }
 
 public class TerrainNodeComponent : ComponentDataWrapper<TerrainNode> { }

@@ -18,7 +18,6 @@ public class TerrainNodeSystem : ComponentSystem
         public JobHandle jobHandle;
         public NativeArray<Vector3> verts;
         public NativeArray<int> tris;
-
     }
     private List<MeshCreationSet> meshCreationSets = new List<MeshCreationSet>();
 
@@ -138,6 +137,26 @@ public class TerrainNodeSystem : ComponentSystem
                     r.mesh = mesh;
 
                     EntityManager.SetSharedComponentData(meshCreationSets[i].entity, r);
+
+                    TerrainNode node = EntityManager.GetComponentData<TerrainNode>(meshCreationSets[i].entity);
+
+                    if(node.level != 0)
+                    {
+                        TerrainNode parentNode = EntityManager.GetComponentData<TerrainNode>(node.parentEntity);
+
+                        if(parentNode.divided == 1)
+                        {
+                            ++parentNode.childrenBuilt;
+                            if(parentNode.childrenBuilt == 4)
+                            {
+                                MeshInstanceRenderer parentR = EntityManager.GetSharedComponentData<MeshInstanceRenderer>(node.parentEntity);
+                                parentR.mesh = null;
+                                EntityManager.SetSharedComponentData(node.parentEntity, parentR);
+                            }
+
+                            EntityManager.SetComponentData(node.parentEntity, parentNode);
+                        }
+                    }
                 }
 
                 meshCreationSets[i].verts.Dispose();
@@ -231,6 +250,7 @@ public class TerrainNodeSystem : ComponentSystem
                 if (dist >= distToSubdivide)
                 {
                     nodeArray[i].divided = 0;
+                    nodeArray[i].childrenBuilt = 0;
                     EntityManager.SetComponentData(entityArray[i], nodeArray[i]);
                 }
             }
@@ -277,7 +297,7 @@ public class TerrainNodeSystem : ComponentSystem
                 mcs.verts = verts;
                 mcs.tris = tris;
                 meshCreationSets.Add(mcs);
-
+                
                 //Mesh mesh = BuildMesh(corners, planetData.meshSubdivisions, planetData.radius, nodeArray[i].noiseData, nodeArray[i].level);
                 //
                 //meshArray[i].mesh = mesh;
@@ -441,6 +461,8 @@ public class TerrainNodeSystem : ComponentSystem
             nodes[i].noiseData = t.noiseData;
             nodes[i].built = 0;
             nodes[i].divided = 0;
+            nodes[i].childrenBuilt = 0;
+            nodes[i].parentEntity = e;
             
             float sphereRadius = t.planetData.radius;
 
