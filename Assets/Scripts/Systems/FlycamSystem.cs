@@ -48,9 +48,11 @@ public class FlycamSystem : ComponentSystem
         float3 right = MathUtils.right(rotArray[0].Value);
         float3 up = MathUtils.up(rotArray[0].Value);
 
-        float3 posChange = forward * Input.GetAxis("ForeBack") * flyCam.moveSpeed
-                         + right * Input.GetAxis("Horizontal") * flyCam.moveSpeed
-                         + up * Input.GetAxis("Vertical") * flyCam.moveSpeed;
+        float dt = Time.deltaTime;
+
+        float3 posChange = forward * Input.GetAxis("ForeBack") * dt * flyCam.moveSpeed
+                         + right * Input.GetAxis("Horizontal") * dt * flyCam.moveSpeed
+                         + up * Input.GetAxis("Vertical") * dt * flyCam.moveSpeed;
 
         posArray[0] = new Position() { Value = posArray[0].Value + posChange };
     }

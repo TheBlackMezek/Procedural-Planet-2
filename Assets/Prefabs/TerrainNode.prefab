@@ -72,7 +72,22 @@ MonoBehaviour:
       radius: 0
       maxNodeLevels: 0
       meshSubdivisions: 0
+    noiseData:
+      octaves: 0
+      frequency: 0
+      lacunarity: 0
+      amplitude: 0
+      persistence: 0
+      finalValueMultiplier: 0
+      seed: 0
+    parentCenter:
+      x: 0
+      y: 0
+      z: 0
+    parnetSubdivideDist: 0
     built: 0
+    divided: 0
+    childrenBuilt: 0
 --- !u!114 &114559557596506474
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -105,7 +120,7 @@ MonoBehaviour:
     material: {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
     subMesh: 0
     castShadows: 0
-    receiveShadows: 0
+    receiveShadows: 1
 --- !u!114 &114984729217530486
 MonoBehaviour:
   m_ObjectHideFlags: 1
