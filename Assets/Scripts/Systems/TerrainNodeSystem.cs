@@ -226,9 +226,11 @@ public class TerrainNodeSystem : ComponentSystem
                 }
                 if(nodeArray[i].level > 0)
                 {
+                    MeshInstanceRenderer parentR
+                        = EntityManager.GetSharedComponentData<MeshInstanceRenderer>(nodeArray[i].parentEntity);
                     float dist = math.distance(camPos, nodeArray[i].parentCenter);
 
-                    if (dist >= nodeArray[i].parnetSubdivideDist)
+                    if (parentR.mesh != null && dist >= nodeArray[i].parnetSubdivideDist)
                         EntityManager.DestroyEntity(entityArray[i]);
                 }
             }
