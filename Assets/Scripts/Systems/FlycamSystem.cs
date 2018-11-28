@@ -42,6 +42,8 @@ public class FlycamSystem : ComponentSystem
         flyCam.moveSpeed += flyCam.moveSpeed * flycamArray[0].moveSpeedChangeMultiplier * Input.GetAxis("Mouse ScrollWheel");
         EntityManager.SetComponentData(entityArray[0], flyCam);
 
+        SystemStaticReferences.SpeedText.text = flyCam.moveSpeed.ToString() + " m/s";
+
         float3 forward = math.forward(rotArray[0].Value);
         float3 right = MathUtils.right(rotArray[0].Value);
         float3 up = MathUtils.up(rotArray[0].Value);
