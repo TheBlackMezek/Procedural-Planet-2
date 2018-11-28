@@ -23,12 +23,12 @@ namespace ECS_Experiments
 
 
 
-        private EntityArchetype arc;
-
-        protected override void OnCreateManager()
-        {
-            arc = EntityManager.CreateArchetype(typeof(Position), typeof(Test), typeof(Unity.Rendering.MeshInstanceRendererComponent));
-        }
+        //private EntityArchetype arc;
+        //
+        //protected override void OnCreateManager()
+        //{
+        //    arc = EntityManager.CreateArchetype(typeof(Position), typeof(Test), typeof(Unity.Rendering.MeshInstanceRendererComponent));
+        //}
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {

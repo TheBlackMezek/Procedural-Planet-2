@@ -107,7 +107,6 @@ public class PlanetSystem : ComponentSystem
 
         for(int i = 0; i < planetArray.Length; ++i)
         {
-            float r = planetArray[i].radius;
             Planet planet = planetArray[i];
             PlanetNoise noise = noiseArray[i];
 

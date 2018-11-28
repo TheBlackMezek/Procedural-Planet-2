@@ -4,7 +4,6 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using Unity.Jobs;
 using UnityEngine;
-using Unity.Mathematics;
 
 public class FlycamSystem : ComponentSystem
 {

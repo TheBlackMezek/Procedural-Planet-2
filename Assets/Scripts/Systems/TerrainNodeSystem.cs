@@ -42,11 +42,9 @@ public class TerrainNodeSystem : ComponentSystem
             
             float dist01 = Vector3.Distance(corner0, corner1);
             float dist12 = Vector3.Distance(corner1, corner2);
-            float dist20 = Vector3.Distance(corner2, corner0);
             
             float lenAxis01 = dist01 / (rez - 1);
             float lenAxis12 = dist12 / (rez - 1);
-            float lenAxis20 = dist20 / (rez - 1);
             
             float3 add1 = math.normalize(corner1 - corner0) * lenAxis01;
             float3 add2 = math.normalize(corner2 - corner1) * lenAxis12;
@@ -349,11 +347,6 @@ public class TerrainNodeSystem : ComponentSystem
         mid02 = corner0 + math.normalize(mid02) * (math.length(mid02) / 2f);
         float3 mid12 = corner2 - corner1;
         mid12 = corner1 + math.normalize(mid12) * (math.length(mid12) / 2f);
-
-        Vector3[] corners0 = new Vector3[] { corner0, mid01, mid02 }; //top
-        Vector3[] corners1 = new Vector3[] { mid01, corner1, mid12 }; //left
-        Vector3[] corners2 = new Vector3[] { mid02, mid12, corner2 }; //right
-        Vector3[] corners3 = new Vector3[] { mid02, mid01, mid12 }; //center
         
         nodes[0].corner1 = corner0;
         nodes[0].corner2 = mid01;
