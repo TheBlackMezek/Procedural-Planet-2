@@ -514,12 +514,12 @@ public class TerrainNodeSystem : ComponentSystem
         for (int i = 0; i < 4; ++i)
             EntityManager.SetComponentData(entities[i], nodes[i]);
 
-        r.mesh = null;
+        //r.mesh = null;
 
         t.divided = 1;
         t.built = 0;
 
-        EntityManager.SetSharedComponentData(e, r);
+        //EntityManager.SetSharedComponentData(e, r);
         EntityManager.SetComponentData(e, t);
     }
 
