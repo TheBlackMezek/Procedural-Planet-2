@@ -120,11 +120,11 @@ public class PlanetSystem : ComponentSystem
                 node.built = 0;
                 node.divided = 0;
 
-                Matrix4x4[] m_MatricesArray = new Matrix4x4[1023];
-                var renderer = EntityManager.GetSharedComponentData<Unity.Rendering.MeshInstanceRenderer>(nodeEntity);
-                Graphics.DrawMeshInstanced(renderer.mesh, renderer.subMesh, renderer.material,
-                        m_MatricesArray,
-                        145, null, renderer.castShadows, renderer.receiveShadows, 0, Camera.main);
+                //Matrix4x4[] m_MatricesArray = new Matrix4x4[1023];
+                //var renderer = EntityManager.GetSharedComponentData<Unity.Rendering.MeshInstanceRenderer>(nodeEntity);
+                //Graphics.DrawMeshInstanced(renderer.mesh, renderer.subMesh, renderer.material,
+                //        m_MatricesArray,
+                //        145, null, renderer.castShadows, renderer.receiveShadows, 0, Camera.main);
 
                 int idx = n * 3;
                 node.corner1 = icoVerts[idx];

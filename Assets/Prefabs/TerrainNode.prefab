@@ -21,8 +21,10 @@ GameObject:
   - component: {fileID: 4176306655886430}
   - component: {fileID: 114984729217530486}
   - component: {fileID: 114101220689406554}
-  - component: {fileID: 114973377059593582}
   - component: {fileID: 114559557596506474}
+  - component: {fileID: 114830550468101112}
+  - component: {fileID: 114067851588911634}
+  - component: {fileID: 114638288598205148}
   m_Layer: 0
   m_Name: TerrainNode
   m_TagString: Untagged
@@ -43,6 +45,22 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &114067851588911634
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1140473896933362}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ffb04273c14bd2e42a6926a15e286a3e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SerializedData:
+    pos:
+      x: 0
+      y: 0
+      z: 0
 --- !u!114 &114101220689406554
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -104,7 +122,7 @@ MonoBehaviour:
       x: 0
       y: 0
       z: 0
---- !u!114 &114973377059593582
+--- !u!114 &114638288598205148
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -112,15 +130,32 @@ MonoBehaviour:
   m_GameObject: {fileID: 1140473896933362}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b0fd4427893a4a16ba0c267dfd00217, type: 3}
+  m_Script: {fileID: 11500000, guid: 0e02d6aa4cd58e6489527a29fabb5421, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_SerializedData:
     mesh: {fileID: 0}
     material: {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
     subMesh: 0
+    layer: 0
     castShadows: 0
-    receiveShadows: 1
+    receiveShadows: 0
+--- !u!114 &114830550468101112
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1140473896933362}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6551a4c74f165cc49bc2cf96f9be57ca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SerializedData:
+    pos:
+      x: 0
+      y: 0
+      z: 0
 --- !u!114 &114984729217530486
 MonoBehaviour:
   m_ObjectHideFlags: 1

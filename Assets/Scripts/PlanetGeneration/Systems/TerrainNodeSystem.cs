@@ -126,7 +126,7 @@ public class TerrainNodeSystem : ComponentSystem
                     mesh.triangles = meshCreationSets[i].tris.ToArray();
                     mesh.RecalculateNormals();
 
-                    MeshInstanceRenderer r = EntityManager.GetSharedComponentData<MeshInstanceRenderer>(meshCreationSets[i].entity);
+                    HPMeshInstanceRenderer r = EntityManager.GetSharedComponentData<HPMeshInstanceRenderer>(meshCreationSets[i].entity);
 
                     r.mesh = mesh;
 
@@ -143,7 +143,7 @@ public class TerrainNodeSystem : ComponentSystem
                             ++parentNode.childrenBuilt;
                             if(parentNode.childrenBuilt == 4)
                             {
-                                MeshInstanceRenderer parentR = EntityManager.GetSharedComponentData<MeshInstanceRenderer>(node.parentEntity);
+                                HPMeshInstanceRenderer parentR = EntityManager.GetSharedComponentData<HPMeshInstanceRenderer>(node.parentEntity);
                                 parentR.mesh = null;
                                 EntityManager.SetSharedComponentData(node.parentEntity, parentR);
                             }
@@ -162,8 +162,8 @@ public class TerrainNodeSystem : ComponentSystem
 
 
 
-        ComponentGroup nodeGroup = GetComponentGroup(typeof(TerrainNode), typeof(MeshInstanceRenderer), typeof(Position));
-        ComponentGroup camGroup = GetComponentGroup(typeof(Flycam), typeof(Position), typeof(Rotation));
+        ComponentGroup nodeGroup = GetComponentGroup(typeof(TerrainNode), typeof(HPMeshInstanceRenderer), typeof(PrecisePosition));
+        ComponentGroup camGroup = GetComponentGroup(typeof(Flycam), typeof(PrecisePosition), typeof(Rotation));
         ComponentGroup dataGroup = GetComponentGroup(typeof(PlanetSharedData));
 
         SharedComponentDataArray<PlanetSharedData> planetDataArray = dataGroup.GetSharedComponentDataArray<PlanetSharedData>();
@@ -176,8 +176,8 @@ public class TerrainNodeSystem : ComponentSystem
         for (int i = 0; i < entityArray.Length; ++i)
             entityArray[i] = entityTempArray[i];
 
-        SharedComponentDataArray<MeshInstanceRenderer> meshCDArray = nodeGroup.GetSharedComponentDataArray<MeshInstanceRenderer>();
-        MeshInstanceRenderer[] meshArray = new MeshInstanceRenderer[meshCDArray.Length];
+        SharedComponentDataArray<HPMeshInstanceRenderer> meshCDArray = nodeGroup.GetSharedComponentDataArray<HPMeshInstanceRenderer>();
+        HPMeshInstanceRenderer[] meshArray = new HPMeshInstanceRenderer[meshCDArray.Length];
         for (int i = 0; i < meshArray.Length; ++i)
             meshArray[i] = meshCDArray[i];
 
@@ -186,13 +186,13 @@ public class TerrainNodeSystem : ComponentSystem
         for (int i = 0; i < nodeCDArray.Length; ++i)
             nodeArray[i] = nodeCDArray[i];
 
-        ComponentDataArray<Position> nodePosArray = nodeGroup.GetComponentDataArray<Position>();
-        Position[] posArray = new Position[nodePosArray.Length];
+        ComponentDataArray<PrecisePosition> nodePosArray = nodeGroup.GetComponentDataArray<PrecisePosition>();
+        PrecisePosition[] posArray = new PrecisePosition[nodePosArray.Length];
         for (int i = 0; i < nodePosArray.Length; ++i)
             posArray[i] = nodePosArray[i];
 
-        ComponentDataArray<Position> camPosArray = camGroup.GetComponentDataArray<Position>();
-        float3 camPos = camPosArray[0].Value;
+        ComponentDataArray<PrecisePosition> camPosArray = camGroup.GetComponentDataArray<PrecisePosition>();
+        float3 camPos = camPosArray[0].pos;
 
 
 
@@ -220,8 +220,8 @@ public class TerrainNodeSystem : ComponentSystem
                 }
                 if(nodeArray[i].level > 0 && EntityManager.Exists(nodeArray[i].parentEntity))
                 {
-                    MeshInstanceRenderer parentR
-                        = EntityManager.GetSharedComponentData<MeshInstanceRenderer>(nodeArray[i].parentEntity);
+                    HPMeshInstanceRenderer parentR
+                        = EntityManager.GetSharedComponentData<HPMeshInstanceRenderer>(nodeArray[i].parentEntity);
                     float dist = math.distance(camPos, nodeArray[i].parentCenter);
 
                     if (parentR.mesh != null && dist >= nodeArray[i].parnetSubdivideDist)
@@ -307,7 +307,7 @@ public class TerrainNodeSystem : ComponentSystem
 
 
 
-    private void Subdivide(Entity e, TerrainNode t, Position p, MeshInstanceRenderer r, PlanetSharedData d)
+    private void Subdivide(Entity e, TerrainNode t, PrecisePosition p, HPMeshInstanceRenderer r, PlanetSharedData d)
     {
         Entity[] entities = new Entity[4];
         TerrainNode[] nodes = new TerrainNode[4];
