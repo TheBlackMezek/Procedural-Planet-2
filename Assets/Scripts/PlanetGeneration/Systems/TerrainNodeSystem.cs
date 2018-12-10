@@ -162,8 +162,8 @@ public class TerrainNodeSystem : ComponentSystem
 
 
 
-        ComponentGroup nodeGroup = GetComponentGroup(typeof(TerrainNode), typeof(HPMeshInstanceRenderer), typeof(PrecisePosition));
-        ComponentGroup camGroup = GetComponentGroup(typeof(Flycam), typeof(PrecisePosition), typeof(Rotation));
+        ComponentGroup nodeGroup = GetComponentGroup(typeof(TerrainNode), typeof(HPMeshInstanceRenderer), typeof(PrecisePosition), typeof(OctantPosition));
+        ComponentGroup camGroup = GetComponentGroup(typeof(Flycam), typeof(PrecisePosition), typeof(Rotation), typeof(OctantPosition));
         ComponentGroup dataGroup = GetComponentGroup(typeof(PlanetSharedData));
 
         SharedComponentDataArray<PlanetSharedData> planetDataArray = dataGroup.GetSharedComponentDataArray<PlanetSharedData>();
@@ -191,9 +191,17 @@ public class TerrainNodeSystem : ComponentSystem
         for (int i = 0; i < nodePosArray.Length; ++i)
             posArray[i] = nodePosArray[i];
 
+        ComponentDataArray<OctantPosition> nodeOctArray = nodeGroup.GetComponentDataArray<OctantPosition>();
+        OctantPosition[] octArray = new OctantPosition[nodePosArray.Length];
+        for (int i = 0; i < nodeOctArray.Length; ++i)
+            octArray[i] = nodeOctArray[i];
+
         ComponentDataArray<PrecisePosition> camPosArray = camGroup.GetComponentDataArray<PrecisePosition>();
         float3 camPos = camPosArray[0].pos;
+        ComponentDataArray<OctantPosition> camOctArray = camGroup.GetComponentDataArray<OctantPosition>();
+        int3 camOct = camOctArray[0].pos;
 
+        float octantSize = HyperposStaticReferences.OctantSize;
 
 
         for (int i = 0; i < meshArray.Length; ++i)
@@ -211,11 +219,27 @@ public class TerrainNodeSystem : ComponentSystem
                     float3 corner1Pos = corner1 * sphereRadius;
 
                     float distToSubdivide = math.distance(corner0Pos, corner1Pos) * (PERCENT_DIST_TO_SUBDIVIDE_AT / 100f);
+                    float distToDivideOverflowF = math.floor(distToSubdivide / octantSize);
+                    int octDistToSubdivide = (int)distToDivideOverflowF;
+                    distToSubdivide -= distToDivideOverflowF * octantSize;
+                    int3 nodeOctPos = octArray[i].pos;
 
                     float3 centerPoint = (math.normalize(corner0 + corner1 + corner2) * sphereRadius);
-                    float dist = math.distance(camPos, centerPoint);
+                    float3 overPosF = math.floor(centerPoint / octantSize);
+                    int3 overPos = (int3)overPosF;
+                    nodeOctPos += overPos;
+                    centerPoint -= overPosF * octantSize;
+                    float preciseDist = math.distance(camPos, centerPoint);
 
-                    if (dist < distToSubdivide)
+                    float octDist = math.distance(camOct, nodeOctPos);
+                    
+                    if (UnityEngine.Random.Range(0, 100) == 4)
+                        Debug.Log("DistToSubdivide:" + distToSubdivide + " OctDistToSubdivide:" + octDistToSubdivide
+                            + " PreciseDist:" + preciseDist + " OctDist:" + octDist
+                            + " CamOctPos:" + camOct + " NodeOctPos:" + nodeOctPos
+                            + " PassesCheck:" + (octDist < octDistToSubdivide || (octDist == octDistToSubdivide && preciseDist < distToSubdivide)));
+
+                    if (octDist < octDistToSubdivide || (octDist == octDistToSubdivide && preciseDist < distToSubdivide))
                         Subdivide(entityArray[i], nodeArray[i], posArray[i], meshArray[i], dataArray[0]);
                 }
                 if(nodeArray[i].level > 0 && EntityManager.Exists(nodeArray[i].parentEntity))
@@ -300,6 +324,7 @@ public class TerrainNodeSystem : ComponentSystem
     {
         for(int i = 0; i < meshCreationSets.Count; ++i)
         {
+            meshCreationSets[i].jobHandle.Complete();
             meshCreationSets[i].verts.Dispose();
             meshCreationSets[i].tris.Dispose();
         }
