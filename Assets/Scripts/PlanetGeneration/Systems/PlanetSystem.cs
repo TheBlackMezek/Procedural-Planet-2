@@ -98,7 +98,7 @@ public class PlanetSystem : ComponentSystem
 
         ComponentGroup planetGroup = GetComponentGroup(typeof(Planet), typeof(PlanetNoise));
         ComponentGroup dataGroup = GetComponentGroup(typeof(PlanetSharedData));
-
+        
         ComponentDataArray<Planet> planetArray = planetGroup.GetComponentDataArray<Planet>();
         ComponentDataArray<PlanetNoise> noiseArray = planetGroup.GetComponentDataArray<PlanetNoise>();
         SharedComponentDataArray<PlanetSharedData> dataArray = dataGroup.GetSharedComponentDataArray<PlanetSharedData>();
@@ -119,6 +119,12 @@ public class PlanetSystem : ComponentSystem
                 node.noiseData = noise;
                 node.built = 0;
                 node.divided = 0;
+
+                Matrix4x4[] m_MatricesArray = new Matrix4x4[1023];
+                var renderer = EntityManager.GetSharedComponentData<Unity.Rendering.MeshInstanceRenderer>(nodeEntity);
+                Graphics.DrawMeshInstanced(renderer.mesh, renderer.subMesh, renderer.material,
+                        m_MatricesArray,
+                        145, null, renderer.castShadows, renderer.receiveShadows, 0, Camera.main);
 
                 int idx = n * 3;
                 node.corner1 = icoVerts[idx];

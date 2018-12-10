@@ -134,7 +134,7 @@ public class TerrainNodeSystem : ComponentSystem
 
                     TerrainNode node = EntityManager.GetComponentData<TerrainNode>(meshCreationSets[i].entity);
 
-                    if(node.level != 0)
+                    if(node.level != 0 && EntityManager.Exists(node.parentEntity))
                     {
                         TerrainNode parentNode = EntityManager.GetComponentData<TerrainNode>(node.parentEntity);
 
@@ -218,7 +218,7 @@ public class TerrainNodeSystem : ComponentSystem
                     if (dist < distToSubdivide)
                         Subdivide(entityArray[i], nodeArray[i], posArray[i], meshArray[i], dataArray[0]);
                 }
-                if(nodeArray[i].level > 0)
+                if(nodeArray[i].level > 0 && EntityManager.Exists(nodeArray[i].parentEntity))
                 {
                     MeshInstanceRenderer parentR
                         = EntityManager.GetSharedComponentData<MeshInstanceRenderer>(nodeArray[i].parentEntity);
