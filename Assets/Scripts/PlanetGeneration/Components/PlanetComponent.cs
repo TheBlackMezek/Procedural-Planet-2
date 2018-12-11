@@ -5,7 +5,7 @@ using UnityEngine;
 [Serializable]
 public struct Planet : IComponentData
 {
-    public float radius;
+    public HyperDistance radius;
     public int maxNodeLevels;
     [Range(0, 8)]
     public int meshSubdivisions;

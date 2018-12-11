@@ -109,6 +109,7 @@ public class PlanetSystem : ComponentSystem
         {
             Planet planet = planetArray[i];
             PlanetNoise noise = noiseArray[i];
+            HyperDistance r = planet.radius;
 
             for(int n = 0; n < 20; ++n)
             {
@@ -120,17 +121,13 @@ public class PlanetSystem : ComponentSystem
                 node.built = 0;
                 node.divided = 0;
 
-                //Matrix4x4[] m_MatricesArray = new Matrix4x4[1023];
-                //var renderer = EntityManager.GetSharedComponentData<Unity.Rendering.MeshInstanceRenderer>(nodeEntity);
-                //Graphics.DrawMeshInstanced(renderer.mesh, renderer.subMesh, renderer.material,
-                //        m_MatricesArray,
-                //        145, null, renderer.castShadows, renderer.receiveShadows, 0, Camera.main);
-
                 int idx = n * 3;
                 node.corner1 = icoVerts[idx];
                 node.corner2 = icoVerts[idx+1];
                 node.corner3 = icoVerts[idx+2];
                 EntityManager.SetComponentData(nodeEntity, node);
+
+                HyperPosition pos = math.normalize(node.corner1 + node.corner2 + node.corner3) * r;
             }
         }
     }

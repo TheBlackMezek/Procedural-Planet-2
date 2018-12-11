@@ -9,6 +9,29 @@ public struct HyperDistance
     public float preciseDist;
 }
 
+public struct HyperPosition
+{
+    public int3 oct;
+    public float3 prs;
+
+    public static HyperPosition operator*(float3 fl3, HyperPosition hyp)
+    {
+        float octantSize = HyperposStaticReferences.OctantSize;
+
+        hyp.prs *= fl3;
+        float3 oct = hyp.oct * fl3;
+        float3 overflow = oct % 1f;
+        oct -= overflow;
+        hyp.prs += overflow * octantSize;
+        overflow = math.floor(hyp.prs / octantSize);
+        hyp.prs -= overflow * octantSize;
+        oct += overflow;
+        hyp.oct = (int3)oct;
+
+        return hyp;
+    }
+}
+
 
 
 public class MathUtils {
