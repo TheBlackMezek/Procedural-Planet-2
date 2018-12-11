@@ -222,38 +222,70 @@ public class TerrainNodeSystem : ComponentSystem
                     float distToDivideOverflowF = math.floor(distToSubdivide / octantSize);
                     int octDistToSubdivide = (int)distToDivideOverflowF;
                     distToSubdivide -= distToDivideOverflowF * octantSize;
-                    int3 nodeOctPos = octArray[i].pos;
 
+                    int3 nodeOctPos = octArray[i].pos;
                     float3 centerPoint = (math.normalize(corner0 + corner1 + corner2) * sphereRadius);
                     float3 overPosF = math.floor(centerPoint / octantSize);
                     int3 overPos = (int3)overPosF;
                     nodeOctPos += overPos;
                     centerPoint -= overPosF * octantSize;
-                    float preciseDist = math.distance(camPos, centerPoint);
 
-                    float octDist = math.distance(camOct, nodeOctPos);
-                    
-                    if (UnityEngine.Random.Range(0, 100) == 4)
-                        Debug.Log("DistToSubdivide:" + distToSubdivide + " OctDistToSubdivide:" + octDistToSubdivide
-                            + " PreciseDist:" + preciseDist + " OctDist:" + octDist
-                            + " CamOctPos:" + camOct + " NodeOctPos:" + nodeOctPos
-                            + " PassesCheck:" + (octDist < octDistToSubdivide || (octDist == octDistToSubdivide && preciseDist < distToSubdivide)));
+                    //HyperDistance dist = MathUtils.Distance(camOct, camPos, nodeOctPos, centerPoint);
+                    //
+                    //float preciseDist = dist.preciseDist;
+                    //float octDist = dist.octantDist;
+                    //
+                    //if (UnityEngine.Random.Range(0, 100) == 4)
+                    //    Debug.Log("camPos:" + camPos + " camOct:" + camOct
+                    //        + " centerPoint:" + centerPoint + " nodeOctPos:" + nodeOctPos
+                    //        + "\nDistToSubdivide:" + distToSubdivide + " OctDistToSubdivide:" + octDistToSubdivide
+                    //        + " PreciseDist:" + preciseDist + " OctDist:" + octDist
+                    //        + " PassesCheck:" + (octDist < octDistToSubdivide || (octDist == octDistToSubdivide && preciseDist < distToSubdivide)));
 
-                    if (octDist < octDistToSubdivide || (octDist == octDistToSubdivide && preciseDist < distToSubdivide))
-                        Subdivide(entityArray[i], nodeArray[i], posArray[i], meshArray[i], dataArray[0]);
+                    //if (octDist < octDistToSubdivide || (octDist == octDistToSubdivide && preciseDist < distToSubdivide))
+                    if(InSubdivideDist(camOct, camPos, nodeOctPos, centerPoint, octDistToSubdivide, distToSubdivide))
+                    {
+                        //if (UnityEngine.Random.Range(0, 100) == 4)
+                        //    Debug.Log("camPos:" + camPos + " camOct:" + camOct
+                        //        + " centerPoint:" + centerPoint + " nodeOctPos:" + nodeOctPos
+                        //        + "\nDistToSubdivide:" + distToSubdivide + " OctDistToSubdivide:" + octDistToSubdivide
+                        //        + " PreciseDist:" + preciseDist + " OctDist:" + octDist
+                        //        + " PassesCheck:" + (octDist < octDistToSubdivide || (octDist == octDistToSubdivide && preciseDist < distToSubdivide)));
+                        Subdivide(entityArray[i], nodeArray[i], meshArray[i], dataArray[0],
+                            distToSubdivide, octDistToSubdivide, centerPoint, nodeOctPos);
+                    }
                 }
                 if(nodeArray[i].level > 0 && EntityManager.Exists(nodeArray[i].parentEntity))
                 {
                     HPMeshInstanceRenderer parentR
                         = EntityManager.GetSharedComponentData<HPMeshInstanceRenderer>(nodeArray[i].parentEntity);
-                    float dist = math.distance(camPos, nodeArray[i].parentCenter);
+                    //float dist = math.distance(camPos, nodeArray[i].parentCenter);
+                    //HyperDistance dist = MathUtils.Distance(camOct, camPos,
+                    //    nodeArray[i].parentOctantCenter, nodeArray[i].parentPreciseCenter);
 
-                    if (parentR.mesh != null && dist >= nodeArray[i].parnetSubdivideDist)
+                    //if (parentR.mesh != null
+                    //    && (dist.octantDist < nodeArray[i].parentOctantSubdivideDist
+                    //        || (dist.octantDist == nodeArray[i].parentOctantSubdivideDist && dist.preciseDist < nodeArray[i].parentPreciseSubdivideDist)))
+                    if(!InSubdivideDist(camOct, camPos, nodeArray[i].parentOctantCenter, nodeArray[i].parentPreciseCenter,
+                        nodeArray[i].parentOctantSubdivideDist, nodeArray[i].parentPreciseSubdivideDist))
                         EntityManager.DestroyEntity(entityArray[i]);
                 }
             }
             else if(nodeArray[i].built == 0 && nodeArray[i].divided == 1)
             {
+                //float3 corner0 = nodeArray[i].corner1;
+                //float3 corner1 = nodeArray[i].corner2;
+                //float3 corner2 = nodeArray[i].corner3;
+                //float sphereRadius = nodeArray[i].planetData.radius;
+                //
+                //float3 corner0Pos = corner0 * sphereRadius;
+                //float3 corner1Pos = corner1 * sphereRadius;
+                //
+                //float distToSubdivide = math.distance(corner0Pos, corner1Pos) * (PERCENT_DIST_TO_SUBDIVIDE_AT / 100f);
+                //
+                //float3 centerPoint = (math.normalize(corner0 + corner1 + corner2) * sphereRadius);
+                //float dist = math.distance(camPos, centerPoint);
+
                 float3 corner0 = nodeArray[i].corner1;
                 float3 corner1 = nodeArray[i].corner2;
                 float3 corner2 = nodeArray[i].corner3;
@@ -263,11 +295,19 @@ public class TerrainNodeSystem : ComponentSystem
                 float3 corner1Pos = corner1 * sphereRadius;
 
                 float distToSubdivide = math.distance(corner0Pos, corner1Pos) * (PERCENT_DIST_TO_SUBDIVIDE_AT / 100f);
+                float distToDivideOverflowF = math.floor(distToSubdivide / octantSize);
+                int octDistToSubdivide = (int)distToDivideOverflowF;
+                distToSubdivide -= distToDivideOverflowF * octantSize;
 
+                int3 nodeOctPos = octArray[i].pos;
                 float3 centerPoint = (math.normalize(corner0 + corner1 + corner2) * sphereRadius);
-                float dist = math.distance(camPos, centerPoint);
-                
-                if (dist >= distToSubdivide)
+                float3 overPosF = math.floor(centerPoint / octantSize);
+                int3 overPos = (int3)overPosF;
+                nodeOctPos += overPos;
+                centerPoint -= overPosF * octantSize;
+
+                //if (dist >= distToSubdivide)
+                if (!InSubdivideDist(camOct, camPos, nodeOctPos, centerPoint, octDistToSubdivide, distToSubdivide))
                 {
                     nodeArray[i].divided = 0;
                     nodeArray[i].childrenBuilt = 0;
@@ -332,11 +372,18 @@ public class TerrainNodeSystem : ComponentSystem
 
 
 
-    private void Subdivide(Entity e, TerrainNode t, PrecisePosition p, HPMeshInstanceRenderer r, PlanetSharedData d)
+    private bool InSubdivideDist(int3 camOct, float3 camPrc, int3 nodeOct, float3 nodePrc, int octDivDist, float prcDivDist)
+    {
+        HyperDistance dist = MathUtils.Distance(camOct, camPrc, nodeOct, nodePrc);
+        return dist.octantDist < octDivDist || (dist.octantDist == octDivDist && dist.preciseDist < prcDivDist);
+    }
+
+    private void Subdivide(Entity e, TerrainNode t, HPMeshInstanceRenderer r, PlanetSharedData d,
+        float parentPrcSubdivideDist, int parentOctSubdivideDist, float3 parentPrcCenter, int3 parentOctCenter)
     {
         Entity[] entities = new Entity[4];
         TerrainNode[] nodes = new TerrainNode[4];
-
+        
         float3 corner0 = t.corner1;
         float3 corner1 = t.corner2;
         float3 corner2 = t.corner3;
@@ -352,18 +399,11 @@ public class TerrainNodeSystem : ComponentSystem
             nodes[i].divided = 0;
             nodes[i].childrenBuilt = 0;
             nodes[i].parentEntity = e;
-            
-            float sphereRadius = t.planetData.radius;
 
-            float3 corner0Pos = corner0 * sphereRadius;
-            float3 corner1Pos = corner1 * sphereRadius;
-
-            float distToSubdivide = math.distance(corner0Pos, corner1Pos) * (PERCENT_DIST_TO_SUBDIVIDE_AT / 100f);
-
-            float3 centerPoint = (math.normalize(corner0 + corner1 + corner2) * sphereRadius);
-
-            nodes[i].parentCenter = centerPoint;
-            nodes[i].parnetSubdivideDist = distToSubdivide;
+            nodes[i].parentPreciseCenter = parentPrcCenter;
+            nodes[i].parentOctantCenter = parentOctCenter;
+            nodes[i].parentPreciseSubdivideDist = parentPrcSubdivideDist;
+            nodes[i].parentOctantSubdivideDist = parentOctSubdivideDist;
         }
         
         float3 mid01 = corner1 - corner0;

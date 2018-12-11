@@ -12,8 +12,10 @@ public struct TerrainNode : IComponentData
     public int level;
     public Planet planetData;
     public PlanetNoise noiseData;
-    public float3 parentCenter;
-    public float parnetSubdivideDist;
+    public float3 parentPreciseCenter;
+    public int3 parentOctantCenter;
+    public float parentPreciseSubdivideDist;
+    public int parentOctantSubdivideDist;
     public int built;
     public int divided;
     public int childrenBuilt;
