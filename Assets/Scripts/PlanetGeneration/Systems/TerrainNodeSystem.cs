@@ -51,14 +51,20 @@ public class TerrainNodeSystem : ComponentSystem
             
             int vIdx = 0;
 
+            float octantSize = HyperposStaticReferences.OctantSize;
+
             for (int i = 0; i < rez; ++i)
             {
                 for (int n = 0; n <= i; ++n)
                 {
                     vertices[vIdx] = corner0 + add1 * i + add2 * n;
-                    Vector3 normal = (vertices[vIdx]).normalized;
+                    float3 normal = (vertices[vIdx]).normalized;
                     float noiseVal = GetValue(normal, node.noiseData, node.level);
-                    vertices[vIdx] = normal * (node.planetData.radius + noiseVal * node.noiseData.finalValueMultiplier);
+                    HyperPosition vertPos = normal * (node.planetData.radius + noiseVal * node.noiseData.finalValueMultiplier);
+                    HyperPosition nodeCenter = GetNodeCenter(node);
+                    HyperPosition relativePos = vertPos - nodeCenter;
+                    vertices[vIdx] = relativePos.prs + (float3)relativePos.oct * octantSize;
+                    //vertices[vIdx] = normal * (node.planetData.radius + noiseVal * node.noiseData.finalValueMultiplier);
                     //vertices[vIdx] = normal * sphereRadius; //Use this line instead of above to gen a perfect sphere
 
                     ++vIdx;
@@ -213,12 +219,13 @@ public class TerrainNodeSystem : ComponentSystem
                     float3 corner0 = nodeArray[i].corner1;
                     float3 corner1 = nodeArray[i].corner2;
                     float3 corner2 = nodeArray[i].corner3;
-                    float sphereRadius = nodeArray[i].planetData.radius;
+                    HyperDistance sphereRadius = nodeArray[i].planetData.radius;
 
-                    float3 corner0Pos = corner0 * sphereRadius;
-                    float3 corner1Pos = corner1 * sphereRadius;
+                    HyperPosition corner0Pos = corner0 * sphereRadius;
+                    HyperPosition corner1Pos = corner1 * sphereRadius;
 
-                    float distToSubdivide = math.distance(corner0Pos, corner1Pos) * (PERCENT_DIST_TO_SUBDIVIDE_AT / 100f);
+                    //float distToSubdivide = math.distance(corner0Pos, corner1Pos) * (PERCENT_DIST_TO_SUBDIVIDE_AT / 100f);
+                    HyperDistance distToSubdivide = MathUtils.Distance(corner0Pos, corner1Pos) * (PERCENT_DIST_TO_SUBDIVIDE_AT / 100f);
                     float distToDivideOverflowF = math.floor(distToSubdivide / octantSize);
                     int octDistToSubdivide = (int)distToDivideOverflowF;
                     distToSubdivide -= distToDivideOverflowF * octantSize;
@@ -439,6 +446,17 @@ public class TerrainNodeSystem : ComponentSystem
     }
 
 
+
+
+    /// <summary>
+    /// Returns node center position relative to planet's center
+    /// </summary>
+    /// <param name="node"></param>
+    /// <returns></returns>
+    public static HyperPosition GetNodeCenter(TerrainNode node)
+    {
+        return math.normalize(node.corner1 + node.corner2 + node.corner3) * node.planetData.radius;
+    }
 
     public static float GetValue(float x, float y, float z, PlanetNoise noiseData, int level = 0)
     {

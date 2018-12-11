@@ -5,8 +5,54 @@ using Unity.Mathematics;
 
 public struct HyperDistance
 {
-    public int octantDist;
-    public float preciseDist;
+    public int oct;
+    public float prs;
+
+    public static HyperDistance operator+(HyperDistance hyd, float fl)
+    {
+        float octantSize = HyperposStaticReferences.OctantSize;
+
+        hyd.prs += fl;
+        float overflow = math.floor(hyd.prs / octantSize);
+        hyd.prs -= overflow * octantSize;
+        hyd.oct += (int)overflow;
+
+        return hyd;
+    }
+
+    public static HyperDistance operator*(HyperDistance hyd, float fl)
+    {
+        float octantSize = HyperposStaticReferences.OctantSize;
+
+        hyd.prs *= fl;
+        float oct = hyd.oct * fl;
+
+        float overflow = math.floor(hyd.prs / octantSize);
+        hyd.prs -= overflow * octantSize;
+        hyd.oct += (int)overflow;
+
+        return hyd;
+    }
+
+    public static HyperPosition operator*(float3 fl3, HyperDistance hyd)
+    {
+        float octantSize = HyperposStaticReferences.OctantSize;
+
+        HyperPosition hyp = new HyperPosition { prs = fl3, oct = new int3() };
+
+        return hyp * hyd;
+    }
+
+    public static HyperPosition operator*(HyperPosition hyp, HyperDistance hyd)
+    {
+        int octantSize = (int)HyperposStaticReferences.OctantSize;
+
+        HyperPosition a = hyp * hyd.prs;
+        int3 oct = a.oct + (hyd.oct * hyp.oct * octantSize);
+        float3 octF = hyd.oct * hyp.prs;
+
+        return new HyperPosition { prs = a.prs, oct = a.oct + oct + (int3)octF };
+    }
 }
 
 public struct HyperPosition
@@ -14,12 +60,55 @@ public struct HyperPosition
     public int3 oct;
     public float3 prs;
 
+    public static HyperPosition operator+(HyperPosition hyp, float fl)
+    {
+        float octantSize = HyperposStaticReferences.OctantSize;
+
+        hyp.prs += fl;
+        float3 overflow = math.floor(hyp.prs / octantSize);
+        hyp.prs -= overflow * octantSize;
+        hyp.oct += (int3)overflow;
+
+        return hyp;
+    }
+
+    public static HyperPosition operator-(HyperPosition lhs, HyperPosition rhs)
+    {
+        float octantSize = HyperposStaticReferences.OctantSize;
+
+        lhs.prs -= rhs.prs;
+        lhs.oct -= rhs.oct;
+
+        float3 overflow = math.floor(lhs.prs / octantSize);
+        lhs.prs -= overflow * octantSize;
+        lhs.oct += (int3)overflow;
+
+        return lhs;
+    }
+
     public static HyperPosition operator*(float3 fl3, HyperPosition hyp)
     {
         float octantSize = HyperposStaticReferences.OctantSize;
 
         hyp.prs *= fl3;
         float3 oct = hyp.oct * fl3;
+        float3 overflow = oct % 1f;
+        oct -= overflow;
+        hyp.prs += overflow * octantSize;
+        overflow = math.floor(hyp.prs / octantSize);
+        hyp.prs -= overflow * octantSize;
+        oct += overflow;
+        hyp.oct = (int3)oct;
+
+        return hyp;
+    }
+
+    public static HyperPosition operator*(HyperPosition hyp, float fl)
+    {
+        float octantSize = HyperposStaticReferences.OctantSize;
+
+        hyp.prs *= fl;
+        float3 oct = (float3)hyp.oct * fl;
         float3 overflow = oct % 1f;
         oct -= overflow;
         hyp.prs += overflow * octantSize;
@@ -62,7 +151,7 @@ public class MathUtils {
     {
         if(Equals(oct1, oct2))
         {
-            return new HyperDistance { octantDist = 0, preciseDist = math.distance(prc1, prc2) };
+            return new HyperDistance { oct = 0, prs = math.distance(prc1, prc2) };
         }
         else
         {
@@ -136,7 +225,89 @@ public class MathUtils {
             prcMag -= overflow2 * octantSize;
             octMag += overflow2;
 
-            return new HyperDistance { octantDist = (int)octMag, preciseDist = prcMag };
+            return new HyperDistance { oct = (int)octMag, prs = prcMag };
+        }
+    }
+
+    public static HyperDistance Distance(HyperPosition p1, HyperPosition p2)
+    {
+        if (Equals(p1.oct, p2.oct))
+        {
+            return new HyperDistance { oct = 0, prs = math.distance(p1.prs, p2.prs) };
+        }
+        else
+        {
+            float octantSize = HyperposStaticReferences.OctantSize;
+
+            int3 octDist = p2.oct - p1.oct;
+            float3 prcDist;
+
+            if (octDist.x == 0)
+            {
+                prcDist.x = p2.prs.x - p1.prs.x;
+            }
+            else
+            {
+                int dir = octDist.x > 0 ? 1 : -1;
+                --octDist.x;
+                if (dir == 1)
+                    prcDist.x = (octantSize - p1.prs.x) + p2.prs.x;
+                else
+                    prcDist.x = (octantSize - p2.prs.x) + p1.prs.x;
+
+                float overflowF = math.floor(prcDist.x / octantSize);
+                int overflow = (int)overflowF;
+                prcDist.x -= overflowF * octantSize;
+                octDist.x += overflow;
+            }
+
+            if (octDist.y == 0)
+            {
+                prcDist.y = p2.prs.y - p1.prs.y;
+            }
+            else
+            {
+                int dir = octDist.y > 0 ? 1 : -1;
+                --octDist.y;
+                if (dir == 1)
+                    prcDist.y = (octantSize - p1.prs.y) + p2.prs.y;
+                else
+                    prcDist.y = (octantSize - p2.prs.y) + p1.prs.y;
+
+                float overflowF = math.floor(prcDist.y / octantSize);
+                int overflow = (int)overflowF;
+                prcDist.y -= overflowF * octantSize;
+                octDist.y += overflow;
+            }
+
+            if (octDist.z == 0)
+            {
+                prcDist.z = p2.prs.z - p1.prs.z;
+            }
+            else
+            {
+                int dir = octDist.z > 0 ? 1 : -1;
+                --octDist.z;
+                if (dir == 1)
+                    prcDist.z = (octantSize - p1.prs.z) + p2.prs.z;
+                else
+                    prcDist.z = (octantSize - p2.prs.z) + p1.prs.z;
+
+                float overflowF = math.floor(prcDist.z / octantSize);
+                int overflow = (int)overflowF;
+                prcDist.z -= overflowF * octantSize;
+                octDist.z += overflow;
+            }
+
+            float octMag = math.length(octDist);
+            float overflow2 = octMag % 1f;
+            octMag -= overflow2;
+            float prcMag = math.length(prcDist) + (overflow2 * octantSize);
+            overflow2 = math.floor(prcMag / octantSize);
+            prcMag -= overflow2 * octantSize;
+            octMag += overflow2;
+
+            return new HyperDistance { oct = (int)octMag, prs = prcMag };
         }
     }
 
