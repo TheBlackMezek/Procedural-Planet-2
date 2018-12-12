@@ -10,7 +10,7 @@ using System.Collections.Generic;
 public class TerrainNodeSystem : ComponentSystem
 {
 
-    private const float PERCENT_DIST_TO_SUBDIVIDE_AT = 150f;
+    private const float PERCENT_DIST_TO_SUBDIVIDE_AT = 200f;
 
     private struct MeshCreationSet
     {
@@ -60,7 +60,9 @@ public class TerrainNodeSystem : ComponentSystem
                     vertices[vIdx] = corner0 + add1 * i + add2 * n;
                     float3 normal = (vertices[vIdx]).normalized;
                     float noiseVal = GetValue(normal, node.noiseData, node.level);
-                    HyperPosition vertPos = normal * (node.planetData.radius + noiseVal * node.noiseData.finalValueMultiplier);
+                    HyperPosition vertPos = normal * ((node.planetData.radius + noiseVal) * node.noiseData.finalValueMultiplier);
+                    //if (n == 0)
+                    //    Debug.Log(MathUtils.ToString((node.planetData.radius + noiseVal) * node.noiseData.finalValueMultiplier));
                     HyperPosition nodeCenter = GetNodeCenter(node);
                     HyperPosition relativePos = vertPos - nodeCenter;
                     vertices[vIdx] = relativePos.prs + (float3)relativePos.oct * octantSize;

@@ -27,11 +27,8 @@ public class HyperposStaticReferences : MonoBehaviour {
     private void Awake()
     {
         OctantSize = octantSize;
+        MainCamera = mainCamera;
         HyperdistCamera = hyperdistCamera;
     }
 
-    //private void Start()
-    //{
-    //    World.Active.GetOrCreateManager<HPMeshInstanceRendererSystem>().ActiveCamera = mainCamera;
-    //}
 }

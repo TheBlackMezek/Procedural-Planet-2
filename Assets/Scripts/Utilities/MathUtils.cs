@@ -58,6 +58,27 @@ public struct HyperDistance
 
         return new HyperPosition { prs = a.prs, oct = oct + (int3)octF };
     }
+
+    public static HyperDistance operator*(HyperDistance lhs, HyperDistance rhs)
+    {
+        float octantSize = HyperposStaticReferences.OctantSize;
+
+        HyperDistance rhsprs = new HyperDistance { prs = rhs.prs, oct = 0 };
+        HyperDistance rhsoct = new HyperDistance { prs = 0, oct = rhs.oct };
+        return rhs;
+        //HyperDistance a = lhs * rhs.prs;
+        //int oct = a.oct + (rhs.oct * lhs.oct * (int)octantSize);
+        //
+        //float octF = lhs.prs * rhs.oct;
+        //float overflow = octF % 1f;
+        //octF -= overflow;
+        //a.prs += overflow * octantSize;
+        //overflow = math.floor(a.prs / octantSize);
+        //a.prs -= overflow * octantSize;
+        //octF += overflow;
+        //
+        //return new HyperDistance { prs = a.prs, oct = oct + (int)octF };
+    }
 }
 
 [System.Serializable]
