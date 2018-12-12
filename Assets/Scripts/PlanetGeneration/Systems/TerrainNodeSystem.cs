@@ -223,42 +223,15 @@ public class TerrainNodeSystem : ComponentSystem
 
                     HyperPosition corner0Pos = corner0 * sphereRadius;
                     HyperPosition corner1Pos = corner1 * sphereRadius;
-
-                    //float distToSubdivide = math.distance(corner0Pos, corner1Pos) * (PERCENT_DIST_TO_SUBDIVIDE_AT / 100f);
-                    HyperDistance distToSubdivide = MathUtils.Distance(corner0Pos, corner1Pos) * (PERCENT_DIST_TO_SUBDIVIDE_AT / 100f);
-                    //float distToDivideOverflowF = math.floor(distToSubdivide / octantSize);
-                    //int octDistToSubdivide = (int)distToDivideOverflowF;
-                    //distToSubdivide -= distToDivideOverflowF * octantSize;
-
-                    //int3 nodeOctPos = octArray[i].pos;
-                    //float3 centerPoint = (math.normalize(corner0 + corner1 + corner2) * sphereRadius);
-                    //float3 overPosF = math.floor(centerPoint / octantSize);
-                    //int3 overPos = (int3)overPosF;
-                    //nodeOctPos += overPos;
-                    //centerPoint -= overPosF * octantSize;
+                    
+                    HyperDistance distToSubdivide = MathUtils.Distance(corner0Pos, corner1Pos)
+                                                                    * (PERCENT_DIST_TO_SUBDIVIDE_AT / 100f);
+                    
                     HyperPosition centerPos = GetNodeCenter(nodeArray[i]);
-
-                    //HyperDistance dist = MathUtils.Distance(camOct, camPos, nodeOctPos, centerPoint);
-                    //
-                    //float preciseDist = dist.preciseDist;
-                    //float octDist = dist.octantDist;
-                    //
-                    //if (UnityEngine.Random.Range(0, 100) == 4)
-                    //    Debug.Log("camPos:" + camPos + " camOct:" + camOct
-                    //        + " centerPoint:" + centerPoint + " nodeOctPos:" + nodeOctPos
-                    //        + "\nDistToSubdivide:" + distToSubdivide + " OctDistToSubdivide:" + octDistToSubdivide
-                    //        + " PreciseDist:" + preciseDist + " OctDist:" + octDist
-                    //        + " PassesCheck:" + (octDist < octDistToSubdivide || (octDist == octDistToSubdivide && preciseDist < distToSubdivide)));
-
-                    //if (octDist < octDistToSubdivide || (octDist == octDistToSubdivide && preciseDist < distToSubdivide))
-                    if(InSubdivideDist(camOct, camPos, centerPos.oct, centerPos.prs, distToSubdivide.oct, distToSubdivide.prs))
+                    //if (UnityEngine.Random.Range(0, 20) == 2)
+                    //    Debug.Log(MathUtils.ToString(distToSubdivide) + "\n" + MathUtils.ToString(centerPos));
+                    if (InSubdivideDist(camOct, camPos, centerPos.oct, centerPos.prs, distToSubdivide.oct, distToSubdivide.prs))
                     {
-                        //if (UnityEngine.Random.Range(0, 100) == 4)
-                        //    Debug.Log("camPos:" + camPos + " camOct:" + camOct
-                        //        + " centerPoint:" + centerPoint + " nodeOctPos:" + nodeOctPos
-                        //        + "\nDistToSubdivide:" + distToSubdivide + " OctDistToSubdivide:" + octDistToSubdivide
-                        //        + " PreciseDist:" + preciseDist + " OctDist:" + octDist
-                        //        + " PassesCheck:" + (octDist < octDistToSubdivide || (octDist == octDistToSubdivide && preciseDist < distToSubdivide)));
                         Subdivide(entityArray[i], nodeArray[i], meshArray[i], dataArray[0],
                             distToSubdivide.prs, distToSubdivide.oct, centerPos.prs, centerPos.oct);
                     }
@@ -449,7 +422,17 @@ public class TerrainNodeSystem : ComponentSystem
         nodes[3].corner3 = mid12;
 
         for (int i = 0; i < 4; ++i)
+        {
             EntityManager.SetComponentData(entities[i], nodes[i]);
+
+            HyperPosition pos = math.normalize(nodes[i].corner1 + nodes[i].corner2 + nodes[i].corner3) * t.planetData.radius;
+
+            PrecisePosition prspos = new PrecisePosition { pos = pos.prs };
+            EntityManager.SetComponentData(entities[i], prspos);
+
+            OctantPosition octpos = new OctantPosition { pos = pos.oct };
+            EntityManager.SetComponentData(entities[i], octpos);
+        }
 
         t.divided = 1;
         t.built = 0;

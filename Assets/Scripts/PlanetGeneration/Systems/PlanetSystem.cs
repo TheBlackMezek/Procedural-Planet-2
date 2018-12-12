@@ -128,6 +128,12 @@ public class PlanetSystem : ComponentSystem
                 EntityManager.SetComponentData(nodeEntity, node);
 
                 HyperPosition pos = math.normalize(node.corner1 + node.corner2 + node.corner3) * r;
+                
+                PrecisePosition prspos = new PrecisePosition { pos = pos.prs };
+                EntityManager.SetComponentData(nodeEntity, prspos);
+
+                OctantPosition octpos = new OctantPosition { pos = pos.oct };
+                EntityManager.SetComponentData(nodeEntity, octpos);
             }
         }
     }

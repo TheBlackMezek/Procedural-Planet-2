@@ -500,7 +500,7 @@ MonoBehaviour:
     pos:
       x: 0
       y: 0
-      z: -2
+      z: 0
 --- !u!114 &1163234354
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -516,7 +516,7 @@ MonoBehaviour:
     pos:
       x: 0
       y: 0
-      z: 0
+      z: -3000
 --- !u!114 &1163234355
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -531,7 +531,7 @@ MonoBehaviour:
   m_SerializedData:
     mouseSensitivity: 0.05
     rollSensitivity: 0.05
-    moveSpeed: 50000
+    moveSpeed: 500
     octMoveSpeed: 0
     moveSpeedChangeMultiplier: 0.7
 --- !u!114 &1163234356
@@ -744,8 +744,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_SerializedData:
-    radius: 50000
-    maxNodeLevels: 11
+    radius:
+      oct: 0
+      prs: 1000
+    maxNodeLevels: 3
     meshSubdivisions: 8
 --- !u!114 &1547857546
 MonoBehaviour:
@@ -788,7 +790,7 @@ MonoBehaviour:
     lacunarity: 3
     amplitude: 1
     persistence: 0.5
-    finalValueMultiplier: 10000
+    finalValueMultiplier: 20
     seed: 1
 --- !u!1 &1725248756
 GameObject:

@@ -3,6 +3,7 @@ using Unity.Mathematics;
 
 
 
+[System.Serializable]
 public struct HyperDistance
 {
     public int oct;
@@ -36,8 +37,6 @@ public struct HyperDistance
 
     public static HyperPosition operator*(float3 fl3, HyperDistance hyd)
     {
-        float octantSize = HyperposStaticReferences.OctantSize;
-
         HyperPosition hyp = new HyperPosition { prs = fl3, oct = new int3() };
 
         return hyp * hyd;
@@ -49,12 +48,13 @@ public struct HyperDistance
 
         HyperPosition a = hyp * hyd.prs;
         int3 oct = a.oct + (hyd.oct * hyp.oct * octantSize);
-        float3 octF = hyd.oct * hyp.prs;
+        float3 octF = hyp.prs * hyd.oct;
 
-        return new HyperPosition { prs = a.prs, oct = a.oct + oct + (int3)octF };
+        return new HyperPosition { prs = a.prs, oct = oct + (int3)octF };
     }
 }
 
+[System.Serializable]
 public struct HyperPosition
 {
     public int3 oct;
@@ -314,6 +314,16 @@ public class MathUtils {
     public static bool Equals(int3 a, int3 b)
     {
         return a.x == b.x && a.y == b.y && a.z == b.z;
+    }
+
+    public static string ToString(HyperPosition hyp)
+    {
+        return hyp.oct.ToString() + " : " + hyp.prs.ToString();
+    }
+
+    public static string ToString(HyperDistance hyd)
+    {
+        return (hyd.oct + " : " + hyd.prs);
     }
 
 }
