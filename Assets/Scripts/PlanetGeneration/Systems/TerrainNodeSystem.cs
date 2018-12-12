@@ -223,15 +223,18 @@ public class TerrainNodeSystem : ComponentSystem
 
                     HyperPosition corner0Pos = corner0 * sphereRadius;
                     HyperPosition corner1Pos = corner1 * sphereRadius;
-                    
+
                     HyperDistance distToSubdivide = MathUtils.Distance(corner0Pos, corner1Pos)
                                                                     * (PERCENT_DIST_TO_SUBDIVIDE_AT / 100f);
                     
                     HyperPosition centerPos = GetNodeCenter(nodeArray[i]);
+                    
                     //if (UnityEngine.Random.Range(0, 20) == 2)
                     //    Debug.Log(MathUtils.ToString(distToSubdivide) + "\n" + MathUtils.ToString(centerPos));
                     if (InSubdivideDist(camOct, camPos, centerPos.oct, centerPos.prs, distToSubdivide.oct, distToSubdivide.prs))
                     {
+                        //Debug.Log(MathUtils.ToString(distToSubdivide) + "\n" + MathUtils.ToString(centerPos)
+                        //    + "\n" + camOct + " " + camPos);
                         Subdivide(entityArray[i], nodeArray[i], meshArray[i], dataArray[0],
                             distToSubdivide.prs, distToSubdivide.oct, centerPos.prs, centerPos.oct);
                     }
@@ -254,19 +257,6 @@ public class TerrainNodeSystem : ComponentSystem
             }
             else if(nodeArray[i].built == 0 && nodeArray[i].divided == 1)
             {
-                //float3 corner0 = nodeArray[i].corner1;
-                //float3 corner1 = nodeArray[i].corner2;
-                //float3 corner2 = nodeArray[i].corner3;
-                //float sphereRadius = nodeArray[i].planetData.radius;
-                //
-                //float3 corner0Pos = corner0 * sphereRadius;
-                //float3 corner1Pos = corner1 * sphereRadius;
-                //
-                //float distToSubdivide = math.distance(corner0Pos, corner1Pos) * (PERCENT_DIST_TO_SUBDIVIDE_AT / 100f);
-                //
-                //float3 centerPoint = (math.normalize(corner0 + corner1 + corner2) * sphereRadius);
-                //float dist = math.distance(camPos, centerPoint);
-
                 float3 corner0 = nodeArray[i].corner1;
                 float3 corner1 = nodeArray[i].corner2;
                 float3 corner2 = nodeArray[i].corner3;
@@ -277,28 +267,7 @@ public class TerrainNodeSystem : ComponentSystem
                 
                 HyperDistance distToSubdivide = MathUtils.Distance(corner0Pos, corner1Pos) * (PERCENT_DIST_TO_SUBDIVIDE_AT / 100f);
                 HyperPosition centerPos = GetNodeCenter(nodeArray[i]);
-
-                //float3 corner0 = nodeArray[i].corner1;
-                //float3 corner1 = nodeArray[i].corner2;
-                //float3 corner2 = nodeArray[i].corner3;
-                //HyperDistance sphereRadius = nodeArray[i].planetData.radius;
-                //
-                //float3 corner0Pos = corner0 * sphereRadius;
-                //float3 corner1Pos = corner1 * sphereRadius;
-                //
-                //float distToSubdivide = math.distance(corner0Pos, corner1Pos) * (PERCENT_DIST_TO_SUBDIVIDE_AT / 100f);
-                //float distToDivideOverflowF = math.floor(distToSubdivide / octantSize);
-                //int octDistToSubdivide = (int)distToDivideOverflowF;
-                //distToSubdivide -= distToDivideOverflowF * octantSize;
-                //
-                //int3 nodeOctPos = octArray[i].pos;
-                //float3 centerPoint = (math.normalize(corner0 + corner1 + corner2) * sphereRadius);
-                //float3 overPosF = math.floor(centerPoint / octantSize);
-                //int3 overPos = (int3)overPosF;
-                //nodeOctPos += overPos;
-                //centerPoint -= overPosF * octantSize;
-
-                //if (dist >= distToSubdivide)
+                
                 if (!InSubdivideDist(camOct, camPos, centerPos.oct, centerPos.prs, distToSubdivide.oct, distToSubdivide.prs))
                 {
                     nodeArray[i].divided = 0;

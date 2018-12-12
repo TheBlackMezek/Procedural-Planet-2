@@ -249,7 +249,7 @@ public class MathUtils {
             else
             {
                 int dir = octDist.x > 0 ? 1 : -1;
-                --octDist.x;
+                octDist.x -= dir;
                 if (dir == 1)
                     prcDist.x = (octantSize - p1.prs.x) + p2.prs.x;
                 else
@@ -268,7 +268,7 @@ public class MathUtils {
             else
             {
                 int dir = octDist.y > 0 ? 1 : -1;
-                --octDist.y;
+                octDist.y -= dir;
                 if (dir == 1)
                     prcDist.y = (octantSize - p1.prs.y) + p2.prs.y;
                 else
@@ -287,7 +287,7 @@ public class MathUtils {
             else
             {
                 int dir = octDist.z > 0 ? 1 : -1;
-                --octDist.z;
+                octDist.z -= dir;
                 if (dir == 1)
                     prcDist.z = (octantSize - p1.prs.z) + p2.prs.z;
                 else
