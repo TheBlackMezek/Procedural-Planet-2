@@ -10,7 +10,7 @@ using System.Collections.Generic;
 public class TerrainNodeSystem : ComponentSystem
 {
 
-    private const float PERCENT_DIST_TO_SUBDIVIDE_AT = 100f;
+    private const float PERCENT_DIST_TO_SUBDIVIDE_AT = 150f;
 
     private struct MeshCreationSet
     {

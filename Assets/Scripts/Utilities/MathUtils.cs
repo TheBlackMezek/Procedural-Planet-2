@@ -12,7 +12,6 @@ public struct HyperDistance
     public static HyperDistance operator+(HyperDistance hyd, float fl)
     {
         float octantSize = HyperposStaticReferences.OctantSize;
-
         hyd.prs += fl;
         float overflow = math.floor(hyd.prs / octantSize);
         hyd.prs -= overflow * octantSize;
@@ -49,6 +48,13 @@ public struct HyperDistance
         HyperPosition a = hyp * hyd.prs;
         int3 oct = a.oct + (hyd.oct * hyp.oct * octantSize);
         float3 octF = hyp.prs * hyd.oct;
+
+        float3 overflow = octF % 1f;
+        octF -= overflow;
+        a.prs += overflow * octantSize;
+        overflow = math.floor(a.prs / octantSize);
+        a.prs -= overflow * octantSize;
+        octF += overflow;
 
         return new HyperPosition { prs = a.prs, oct = oct + (int3)octF };
     }
