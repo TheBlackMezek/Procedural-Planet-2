@@ -20,7 +20,36 @@ public struct HyperDistance
         return hyd;
     }
 
+    public static HyperDistance operator+(HyperDistance lhs, HyperDistance rhs)
+    {
+        float octantSize = HyperposStaticReferences.OctantSize;
+
+        HyperDistance final;
+
+        final.prs = lhs.prs + rhs.prs;
+        final.oct = lhs.oct + rhs.oct;
+        float overflow = math.floor(final.prs / octantSize);
+        final.prs -= overflow * octantSize;
+        final.oct += (int)overflow;
+
+        return final;
+    }
+
     public static HyperDistance operator*(HyperDistance hyd, float fl)
+    {
+        float octantSize = HyperposStaticReferences.OctantSize;
+
+        hyd.prs *= fl;
+        float oct = hyd.oct * fl;
+
+        float overflow = math.floor(hyd.prs / octantSize);
+        hyd.prs -= overflow * octantSize;
+        hyd.oct += (int)overflow;
+
+        return hyd;
+    }
+
+    public static HyperDistance operator*(float fl, HyperDistance hyd)
     {
         float octantSize = HyperposStaticReferences.OctantSize;
 
@@ -65,7 +94,19 @@ public struct HyperDistance
 
         HyperDistance rhsprs = new HyperDistance { prs = rhs.prs, oct = 0 };
         HyperDistance rhsoct = new HyperDistance { prs = 0, oct = rhs.oct };
-        return rhs;
+        HyperDistance lhsprs = new HyperDistance { prs = lhs.prs, oct = 0 };
+        HyperDistance lhsoct = new HyperDistance { prs = 0, oct = lhs.oct };
+
+        HyperDistance a = rhsprs.prs * lhsprs;
+        HyperDistance b = rhsprs.prs * lhsoct;
+        float oct = (rhsoct.oct * lhsprs.prs) + (rhsoct.oct * lhsoct.oct * octantSize);
+        float overflow = oct % 1f;
+        oct -= overflow;
+        overflow *= octantSize;
+        a.prs += overflow;
+        a.oct += (int)oct;
+
+        return a + b;
         //HyperDistance a = lhs * rhs.prs;
         //int oct = a.oct + (rhs.oct * lhs.oct * (int)octantSize);
         //

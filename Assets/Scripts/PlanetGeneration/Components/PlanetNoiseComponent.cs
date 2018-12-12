@@ -13,8 +13,8 @@ public struct PlanetNoise : IComponentData
 
     //public PlanetColorLayer[] colorLayers;
 
-    public float finalValueMultiplier;
-    //public HyperDistance finalValueMultiplier;
+    //public float finalValueMultiplier;
+    public HyperDistance finalValueMultiplier;
 
     public int seed;
 }
