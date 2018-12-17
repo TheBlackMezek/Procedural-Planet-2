@@ -20,6 +20,7 @@ public struct TerrainNode : IComponentData
     public int divided;
     public int childrenBuilt;
     public Entity parentEntity;
+    public int hyperDistant;
 }
 
 public class TerrainNodeComponent : ComponentDataWrapper<TerrainNode> { }

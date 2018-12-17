@@ -53,6 +53,10 @@ public class TerrainNodeSystem : ComponentSystem
 
             float octantSize = HyperposStaticReferences.OctantSize;
 
+            HyperDistance radius = node.planetData.radius;
+            if (node.hyperDistant == 1)
+                radius = radius / new HyperDistance { prs = 0f, oct = 1 };
+            
             for (int i = 0; i < rez; ++i)
             {
                 for (int n = 0; n <= i; ++n)
@@ -60,11 +64,11 @@ public class TerrainNodeSystem : ComponentSystem
                     vertices[vIdx] = corner0 + add1 * i + add2 * n;
                     float3 normal = (vertices[vIdx]).normalized;
                     float noiseVal = GetValue(normal, node.noiseData, node.level);
-                    HyperPosition vertPos = normal * (node.planetData.radius + (noiseVal * node.noiseData.finalValueMultiplier));
-                    if (n == 0)
-                        Debug.Log(MathUtils.ToString(node.planetData.radius) + "\n" +
-                            MathUtils.ToString(noiseVal * node.noiseData.finalValueMultiplier) + "\n" +
-                            MathUtils.ToString(node.planetData.radius + (noiseVal * node.noiseData.finalValueMultiplier)));
+                    HyperPosition vertPos = normal * (radius + (noiseVal * node.noiseData.finalValueMultiplier));
+                    //if (n == 0)
+                    //    Debug.Log(MathUtils.ToString(node.planetData.radius) + "\n" +
+                    //        MathUtils.ToString(noiseVal * node.noiseData.finalValueMultiplier) + "\n" +
+                    //        MathUtils.ToString(node.planetData.radius + (noiseVal * node.noiseData.finalValueMultiplier)));
                     HyperPosition nodeCenter = GetNodeCenter(node);
                     HyperPosition relativePos = vertPos - nodeCenter;
                     vertices[vIdx] = relativePos.prs + (float3)relativePos.oct * octantSize;
@@ -297,6 +301,23 @@ public class TerrainNodeSystem : ComponentSystem
 
                 NativeArray<Vector3> verts = new NativeArray<Vector3>(nVerts, Allocator.Persistent);
                 NativeArray<int> tris = new NativeArray<int>(nTris * 3, Allocator.Persistent);
+
+                HyperPosition centerPos = GetNodeCenter(nodeArray[i]);
+                HyperPosition camHyp = new HyperPosition { prs = camPos, oct = camOct };
+                HyperDistance dist = MathUtils.Distance(centerPos, camHyp);
+
+                if (dist > planetData.hyperdistanceThreshold)
+                {
+                    nodeArray[i].hyperDistant = 1;
+                    if(!EntityManager.HasComponent<HyperdistantMarker>(entityArray[i]))
+                        EntityManager.AddComponent(entityArray[i], typeof(HyperdistantMarker));
+                }
+                else
+                {
+                    nodeArray[i].hyperDistant = 0;
+                    if (EntityManager.HasComponent<HyperdistantMarker>(entityArray[i]))
+                        EntityManager.RemoveComponent(entityArray[i], typeof(HyperdistantMarker));
+                }
 
                 MeshBuildJob job = new MeshBuildJob();
                 job.node = nodeArray[i];

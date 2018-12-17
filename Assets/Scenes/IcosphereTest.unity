@@ -834,6 +834,9 @@ MonoBehaviour:
     radius:
       oct: 63
       prs: 0
+    hyperdistanceThreshold:
+      oct: 10
+      prs: 0
     maxNodeLevels: 12
     meshSubdivisions: 8
 --- !u!114 &1547857546

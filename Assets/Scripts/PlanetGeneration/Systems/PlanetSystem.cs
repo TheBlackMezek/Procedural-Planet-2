@@ -120,6 +120,7 @@ public class PlanetSystem : ComponentSystem
                 node.noiseData = noise;
                 node.built = 0;
                 node.divided = 0;
+                node.hyperDistant = 1;
 
                 int idx = n * 3;
                 node.corner1 = icoVerts[idx];
