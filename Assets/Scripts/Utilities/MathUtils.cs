@@ -121,28 +121,6 @@ public struct HyperDistance
         //return new HyperDistance { prs = a.prs, oct = oct + (int)octF };
     }
 
-    public static HyperDistance operator/(HyperDistance lhs, HyperDistance rhs)
-    {
-        float octantSize = HyperposStaticReferences.OctantSize;
-
-        //int oct = lhs.oct / rhs.oct;
-        int oct = 0;
-        float r = 0f;
-        if(rhs.oct != 0)
-        {
-            oct = lhs.oct / rhs.oct;
-            r = (float)lhs.oct % rhs.oct;
-        }
-        else
-        {
-
-        }
-        
-        float prs = (r * octantSize + lhs.prs) / rhs.prs;
-
-        return new HyperDistance { prs = prs, oct = oct };
-    }
-
     public static bool operator>(HyperDistance lhs, HyperDistance rhs)
     {
         bool ret = false;
