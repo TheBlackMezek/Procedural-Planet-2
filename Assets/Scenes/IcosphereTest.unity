@@ -881,8 +881,8 @@ MonoBehaviour:
     amplitude: 1
     persistence: 0.5
     finalValueMultiplier:
-      oct: 1
-      prs: 0
+      oct: 0
+      prs: 99000
     seed: 0
 --- !u!1 &1725248756
 GameObject:

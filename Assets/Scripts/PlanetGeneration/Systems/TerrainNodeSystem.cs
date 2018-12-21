@@ -54,8 +54,8 @@ public class TerrainNodeSystem : ComponentSystem
             float octantSize = HyperposStaticReferences.OctantSize;
 
             HyperDistance radius = node.planetData.radius;
-            if (node.hyperDistant == 1)
-                radius = radius / new HyperDistance { prs = 0f, oct = 1 };
+            //if (node.hyperDistant == 1)
+            //    radius = radius / new HyperDistance { prs = 0f, oct = 1 };
             
             for (int i = 0; i < rez; ++i)
             {
@@ -306,18 +306,18 @@ public class TerrainNodeSystem : ComponentSystem
                 HyperPosition camHyp = new HyperPosition { prs = camPos, oct = camOct };
                 HyperDistance dist = MathUtils.Distance(centerPos, camHyp);
 
-                if (dist > planetData.hyperdistanceThreshold)
-                {
-                    nodeArray[i].hyperDistant = 1;
-                    if(!EntityManager.HasComponent<HyperdistantMarker>(entityArray[i]))
-                        EntityManager.AddComponent(entityArray[i], typeof(HyperdistantMarker));
-                }
-                else
-                {
-                    nodeArray[i].hyperDistant = 0;
-                    if (EntityManager.HasComponent<HyperdistantMarker>(entityArray[i]))
-                        EntityManager.RemoveComponent(entityArray[i], typeof(HyperdistantMarker));
-                }
+                //if (dist > planetData.hyperdistanceThreshold)
+                //{
+                //    nodeArray[i].hyperDistant = 1;
+                //    if(!EntityManager.HasComponent<HyperdistantMarker>(entityArray[i]))
+                //        EntityManager.AddComponent(entityArray[i], typeof(HyperdistantMarker));
+                //}
+                //else
+                //{
+                //    nodeArray[i].hyperDistant = 0;
+                //    if (EntityManager.HasComponent<HyperdistantMarker>(entityArray[i]))
+                //        EntityManager.RemoveComponent(entityArray[i], typeof(HyperdistantMarker));
+                //}
 
                 MeshBuildJob job = new MeshBuildJob();
                 job.node = nodeArray[i];
